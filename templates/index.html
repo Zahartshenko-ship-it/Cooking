@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Умный Шеф</title>
+    <style>
+        :root { --primary: #4CAF50; --bg: #f4f4f9; --text: #333; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        h1, h2 { text-align: center; color: #2c3e50; }
+
+        /* Поиск ингредиентов */
+        .search-box { position: relative; max-width: 500px; margin: 20px auto; }
+        input[type="text"] { width: 100%; padding: 15px; border: 2px solid #ddd; border-radius: 25px; font-size: 16px; outline: none; box-sizing: border-box; }
+        input[type="text"]:focus { border-color: var(--primary); }
+        .suggestions { position: absolute; width: 100%; background: white; border: 1px solid #ddd; border-radius: 10px; max-height: 200px; overflow-y: auto; z-index: 10; display: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .suggestions div { padding: 10px; cursor: pointer; border-bottom: 1px solid #eee; }
+        .suggestions div:hover { background: #e8f5e9; }
+
+        /* Холодильник */
+        .fridge { display: flex; flex-wrap: wrap; gap: 10px; margin: 20px 0; justify-content: center; min-height: 50px; }
+        .fridge-item { background: var(--primary); color: white; padding: 8px 15px; border-radius: 20px; display: flex; align-items: center; gap: 8px; font-size: 14px; }
+        .fridge-item span { cursor: pointer; font-weight: bold; }
+
+        /* Кнопка */
+        .btn-find { display: block; width: 200px; margin: 20px auto; padding: 15px; background: #2c3e50; color: white; border: none; border-radius: 25px; font-size: 18px; cursor: pointer; transition: 0.3s; }
+        .btn-find:hover { background: #34495e; transform: scale(1.05); }
+
+        /* Результаты */
+        .results-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; margin-top: 30px; }
+        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .card h3 { margin-top: 0; color: var(--primary); }
+        .tag { display: inline-block; background: #eee; padding: 4px 8px; border-radius: 5px; font-size: 12px; margin: 2px; }
+        .missing { color: #e74c3c; font-size: 13px; margin-top: 10px; }
+        .score { float: right; font-weight: bold; color: #2c3e50; }
+
+        .section-title { border-bottom: 2px solid #ddd; padding-bottom: 10px; margin-top: 40px; }
+        .loader { text-align: center; display: none; color: #666; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1> Что приготовить?</h1>
+    <p style="text-align: center; color: #666;">Выберите продукты, которые у вас есть в холодильнике</p>
+
+    <!-- Поиск -->
+    <div class="search-box">
+        <label for="ingredientInput">Поиск ингредиента</label>
+        <input type="text" id="ingredientInput" placeholder="Начните вводить продукт (например: курица)...">
+        <div class="suggestions" id="suggestionsBox"></div>
+    </div>
+
+    <div class="fridge" id="fridgeList">
+    </div>
+    <div style="text-align: center; color: #999; font-size: 13px;" id="countDisplay">Выбрано: 0</div>
+
+    <button class="btn-find" onclick="findRecipes()">Найти рецепты</button>
+    <div class="loader" id="loader">Ищем лучшие рецепты...</div>
+
+    <div id="resultsArea">
+        <h2 class="section-title"> Можно приготовить сразу</h2>
+        <div class="results-grid" id="strictResults"></div>
+
+        <h2 class="section-title"> Нужно докупить (1-2 продукта)</h2>
+        <div class="results-grid" id="extraResults"></div>
+    </div>
+</div>
+
+<script>
+    let allIngredients = [];
+    let myFridge = [];
+
+    // 1. Загрузка списка ингредиентов при старте
+    fetch('/api/ingredients')
+        .then(res => res.json())
+        .then(data => {
+            allIngredients = data;
+            console.log(`Загружено ${allIngredients.length} ингредиентов`);
+        });
+
+    // 2. Логика поиска (Автокомплит)
+    const input = document.getElementById('ingredientInput');
+    const suggestionsBox = document.getElementById('suggestionsBox');
+
+    input.addEventListener('input', function() {
+        const val = this.value.toLowerCase();
+        suggestionsBox.innerHTML = '';
+        if (!val) { suggestionsBox.style.display = 'none'; return; }
+
+        // Фильтруем список (берем первые 10 совпадений)
+        const matches = allIngredients.filter(ing => ing.includes(val)).slice(0, 10);
+
+        if (matches.length > 0) {
+            suggestionsBox.style.display = 'block';
+            matches.forEach(match => {
+                const div = document.createElement('div');
+                // Заменяем _ на пробел для отображения
+                div.textContent = match.replace(/_/g, ' ');
+                div.onclick = () => {
+                    addToFridge(match);
+                    input.value = '';
+                    suggestionsBox.style.display = 'none';
+                };
+                suggestionsBox.appendChild(div);
+            });
+        } else {
+            suggestionsBox.style.display = 'none';
+        }
+    });
+
+    // Скрыть подсказки при клике вне
+    document.addEventListener('click', function(e) {
+        if (e.target !== input) suggestionsBox.style.display = 'none';
+    });
+
+    // 3. Добавление в холодильник
+    function addToFridge(ing) {
+        if (!myFridge.includes(ing)) {
+            myFridge.push(ing);
+            renderFridge();
+        }
+    }
+
+    function removeFromFridge(ing) {
+        myFridge = myFridge.filter(i => i !== ing);
+        renderFridge();
+    }
+
+    function renderFridge() {
+        const container = document.getElementById('fridgeList');
+        container.innerHTML = '';
+        myFridge.forEach(ing => {
+            const div = document.createElement('div');
+            div.className = 'fridge-item';
+            div.innerHTML = `${ing.replace(/_/g, ' ')} <span onclick="removeFromFridge('${ing}')">&times;</span>`;
+            container.appendChild(div);
+        });
+        document.getElementById('countDisplay').textContent = `Выбрано: ${myFridge.length}`;
+    }
+
+    // 4. Отправка запроса на бэкенд
+    function findRecipes() {
+        if (myFridge.length === 0) {
+            alert("Выберите хотя бы один продукт!");
+            return;
+        }
+
+        document.getElementById('loader').style.display = 'block';
+        document.getElementById('strictResults').innerHTML = '';
+        document.getElementById('extraResults').innerHTML = '';
+
+        fetch('/api/recommend', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ products: myFridge })
+        })
+        .then(res => res.json())
+        .then(data => {
+            document.getElementById('loader').style.display = 'none';
+            renderCards('strictResults', data.strict, true);
+            renderCards('extraResults', data.extras, false);
+        })
+        .catch(err => {
+            console.error(err);
+            document.getElementById('loader').style.display = 'none';
+            alert("Ошибка при поиске рецептов");
+        });
+    }
+
+    function renderCards(elementId, recipes, isStrict) {
+        const container = document.getElementById(elementId);
+        if (recipes.length === 0) {
+            container.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #999;">Ничего не найдено 😔</p>';
+            return;
+        }
+
+        recipes.forEach(r => {
+            const card = document.createElement('div');
+            card.className = 'card';
+
+            let ingredientsHtml = '';
+            if (isStrict) {
+                ingredientsHtml = `<p><small>${r.ingredients}</small></p>`;
+            } else {
+                ingredientsHtml = `<div class="missing"> Докупить: ${r.missing.join(', ')}</div>`;
+            }
+
+            card.innerHTML = `
+                <h3>${r.name} <span class="score">${isStrict ? '100%' : Math.round(r.score*100) + '%'}</span></h3>
+                ${ingredientsHtml}
+                ${!isStrict ? `<p>Ваших продуктов: <b>${r.found_count}</b></p>` : ''}
+            `;
+            container.appendChild(card);
+        });
+    }
+</script>
+
+</body>
+</html>
