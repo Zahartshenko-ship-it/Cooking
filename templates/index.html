@@ -10,6 +10,51 @@
         .container { max-width: 1000px; margin: 0 auto; }
         h1, h2 { text-align: center; color: #2c3e50; }
 
+                .dropdown-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .ingredient-select {
+            flex-grow: 1;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+        }
+
+        .btn-add {
+            background-color: #f0f0f0;
+            color: #333;
+            border: 1px dashed #ccc;
+            padding: 10px;
+            width: 100%;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 5px;
+            font-size: 14px;
+        }
+
+        .btn-add:hover {
+            background-color: #e4e4e4;
+        }
+
+        .btn-remove {
+            background-color: #ff4d4d;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 15px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .btn-remove:hover {
+            background-color: #cc0000;
+        }
+
         /* Поиск ингредиентов */
         .search-box { position: relative; max-width: 500px; margin: 20px auto; }
         input[type="text"] { width: 100%; padding: 15px; border: 2px solid #ddd; border-radius: 25px; font-size: 16px; outline: none; box-sizing: border-box; }
@@ -45,15 +90,27 @@
     <h1> Что приготовить?</h1>
     <p style="text-align: center; color: #666;">Выберите продукты, которые у вас есть в холодильнике</p>
 
-    <!-- Поиск -->
     <div class="search-box">
-        <label for="ingredientInput">Поиск ингредиента</label>
-        <input type="text" id="ingredientInput" placeholder="Начните вводить продукт (например: курица)...">
-        <div class="suggestions" id="suggestionsBox"></div>
+        <label>Выберите ингредиенты</label>
+        
+        <div id="dropdownsContainer">
+            <div class="dropdown-wrapper">
+                <select class="ingredient-select" onchange="updateCount()">
+                    <option value="" disabled selected>Выберите продукт...</option>
+                    <option value="курица">Курица</option>
+                    <option value="картофель">Картофель</option>
+                    <option value="помидор">Помидор</option>
+                    <option value="яйцо">Яйцо</option>
+                    <option value="лук">Лук</option>
+                    </select>
+                </div>
+        </div>
+
+        <button class="btn-add" type="button" onclick="addDropdown()">+ Добавить еще продукт</button>
     </div>
 
-    <div class="fridge" id="fridgeList">
-    </div>
+    <div class="fridge" id="fridgeList"></div>
+    
     <div style="text-align: center; color: #999; font-size: 13px;" id="countDisplay">Выбрано: 0</div>
 
     <button class="btn-find" onclick="findRecipes()">Найти рецепты</button>
@@ -139,6 +196,51 @@
         });
         document.getElementById('countDisplay').textContent = `Выбрано: ${myFridge.length}`;
     }
+
+    function addDropdown() {
+    const container = document.getElementById('dropdownsContainer');
+    
+    // Находим первый выпадающий список на странице, чтобы скопировать его (вместе со всеми option)
+    const originalSelect = container.querySelector('.ingredient-select');
+    
+    // Создаем обертку для нового списка и кнопки
+    const wrapper = document.createElement('div');
+    wrapper.className = 'dropdown-wrapper';
+
+    // Клонируем список и сбрасываем его значение
+    const newSelect = originalSelect.cloneNode(true);
+    newSelect.selectedIndex = 0; // Возвращаем на "Выберите продукт..."
+    newSelect.onchange = updateCount; // Привязываем пересчет
+
+    // Создаем кнопку для удаления именно этой строки
+    const removeBtn = document.createElement('button');
+    removeBtn.className = 'btn-remove';
+    removeBtn.type = 'button';
+    removeBtn.innerHTML = '✖';
+    removeBtn.onclick = function() {
+        wrapper.remove();
+        updateCount(); // Пересчитываем количество после удаления
+    };
+
+    // Собираем всё вместе и добавляем в контейнер
+    wrapper.appendChild(newSelect);
+    wrapper.appendChild(removeBtn);
+    container.appendChild(wrapper);
+}
+
+// Пример функции подсчета (чтобы работал id="countDisplay")
+function updateCount() {
+    const selects = document.querySelectorAll('.ingredient-select');
+    let count = 0;
+    
+    selects.forEach(select => {
+        if (select.value) { // Если выбрано что-то кроме заглушки
+            count++;
+        }
+    });
+    
+    document.getElementById('countDisplay').textContent = `Выбрано: ${count}`;
+}
 
     // 4. Отправка запроса на бэкенд
     function findRecipes() {
