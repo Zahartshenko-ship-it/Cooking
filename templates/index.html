@@ -87,10 +87,16 @@
     input.addEventListener('input', function() {
         const val = this.value.toLowerCase();
         suggestionsBox.innerHTML = '';
-        if (!val) { suggestionsBox.style.display = 'none'; return; }
+        
+        if (!val) { 
+            suggestionsBox.style.display = 'none'; 
+            return; 
+        }
 
-        // Фильтруем список (берем первые 10 совпадений)
-        const matches = allIngredients.filter(ing => ing.includes(val)).slice(0, 10);
+        // Фильтруем список: проверяем, начинается ли строка с val
+        const matches = allIngredients
+            .filter(ing => ing.toLowerCase().startsWith(val)) 
+            .slice(0, 30);
 
         if (matches.length > 0) {
             suggestionsBox.style.display = 'block';

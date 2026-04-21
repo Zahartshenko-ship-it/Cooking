@@ -1,6 +1,8 @@
 import pandas as pd
 import ast
 import difflib
+import re
+from sqlalchemy import create_engine
 from flask import Flask, render_template, request, jsonify
 
 app = Flask(__name__)
@@ -9,124 +11,73 @@ df = None
 ALL_INGREDIENTS = []
 
 
-# =============================
-# Вспомогательные функции
-# =============================
-
 def clean_ingredients(text):
-    try:
-        if isinstance(text, str):
-            try:
-                d = ast.literal_eval(text)
-                ingredients = [k.replace(" ", "_").lower() for k in d.keys()]
-                return " ".join(sorted(ingredients))
-            except:
-                return text.replace(" ", "_").lower()
-        return ""
-    except:
+    """
+    Парсит строку вида 'Свинина — 300 г | Лук — 2 шт'
+    """
+    if not isinstance(text, str) or text.strip() == "":
         return ""
 
+    items = text.split('|')
+    ingredients = []
 
-def fuzzy_match(term, choices_set):
-    term = term.lower()
-    if term in choices_set:
-        return True
-    matches = difflib.get_close_matches(term, choices_set, n=1, cutoff=0.8)
-    return len(matches) > 0
+    for item in items:
+        ing_name = re.split(r'\s+[—\-]\s+', item.strip())[0]
+        ing_name = re.sub(r'\(.*?\)', '', ing_name).strip().lower()
+        ing_name = ing_name.replace(" ", "_")
 
+        if ing_name:
+            ingredients.append(ing_name)
 
-def fuzzy_intersection(user_set, recipe_list):
-    matched_count = 0
-    missing = []
-    for r_ing in recipe_list:
-        if fuzzy_match(r_ing, user_set):
-            matched_count += 1
-        else:
-            missing.append(r_ing)
-    return matched_count, missing
-
+    return " ".join(sorted(set(ingredients)))
 
 # =============================
 # Логика рекомендаций
 # =============================
 
-def recommend_strict(user_products, top_n=5):
-    if not user_products:
-        return []
-
+def recommend_strict(df, user_products, top_n=5):
     user_set = set([p.lower().replace(" ", "_") for p in user_products])
 
     def is_subset(recipe_text):
-        if not recipe_text: return False
-        recipe_ings = recipe_text.split()
-        return all(fuzzy_match(r_ing, user_set) for r_ing in recipe_ings)
+        recipe_ings = set(recipe_text.split())
+        if not recipe_ings:
+            return False
+        return recipe_ings.issubset(user_set)
 
     mask = df['ingredients'].apply(is_subset)
-    filtered_df = df[mask].copy()
+    res_df = df[mask].copy()
 
-    if filtered_df.empty:
+    if res_df.empty:
         return []
 
-    filtered_df['ing_count'] = filtered_df['ingredients'].apply(lambda x: len(x.split()) if x else 0)
-    filtered_df = filtered_df.sort_values('ing_count', ascending=True)
+    res_df['ing_count'] = res_df['ingredients'].apply(lambda x: len(x.split()))
+    res_df = res_df.sort_values('ing_count')
 
-    results = []
-    for _, row in filtered_df.head(top_n).iterrows():
-        recipe_ings = row['ingredients'].split() if row['ingredients'] else []
-        matched, _ = fuzzy_intersection(user_set, recipe_ings)
-        results.append({
-            "name": row["name"],
-            "ingredients": row["ingredients"].replace("_", " "),  # Для красоты
-            "score": matched / len(recipe_ings) if recipe_ings else 0
-        })
-    return results
+    return res_df.head(top_n)[['name', 'ingredients']].to_dict('records')
 
 
-def recommend_with_extras(user_products, top_n=5):
-    if not user_products:
-        return []
-
+def recommend_with_extras(df, user_products, top_n=5):
     user_set = set([p.lower().replace(" ", "_") for p in user_products])
 
     def score_recipe(recipe_text):
-        if not recipe_text: return -1, [], 0
         recipe_ings = recipe_text.split()
-        recipe_set = set(recipe_ings)
-        matched, missing = fuzzy_intersection(user_set, recipe_ings)
-
-        if matched == 0: return -1, [], 0
-
-        union = len(recipe_set) + len(user_set) - matched
-        jaccard = matched / union if union else 0
-
-        score = jaccard - len(missing) * 0.05
+        if not recipe_ings:
+            return -1, [], 0
+        matched = sum(1 for ing in recipe_ings if ing in user_set)
+        missing = [ing for ing in recipe_ings if ing not in user_set]
+        score = (matched / len(recipe_ings)) - (len(missing) * 0.05)
         return score, missing, matched
 
     analysis = df['ingredients'].apply(score_recipe)
+    temp_df = df.copy()
+    temp_df['score'] = analysis.apply(lambda x: x[0])
+    temp_df['missing'] = analysis.apply(lambda x: x[1])
+    temp_df['found_count'] = analysis.apply(lambda x: x[2])
 
-    temp_results = []
-    for idx, (score, missing, matched) in enumerate(analysis):
-        if score > 0:
-            temp_results.append({
-                'idx': idx,
-                'score': score,
-                'missing': missing,
-                'matched': matched
-            })
+    filtered = temp_df[(temp_df['found_count'] > 0) & (temp_df['score'] > 0)]
+    filtered = filtered.sort_values('score', ascending=False)
 
-    # Сортируем по скорингу
-    temp_results.sort(key=lambda x: x['score'], reverse=True)
-
-    final_results = []
-    for item in temp_results[:top_n]:
-        row = df.iloc[item['idx']]
-        final_results.append({
-            "name": row["name"],
-            "found_count": item['matched'],
-            "missing": [m.replace("_", " ") for m in item['missing']],
-            "score": round(item['score'], 3)
-        })
-    return final_results
+    return filtered.head(top_n).to_dict('records')
 
 
 # =============================
@@ -136,27 +87,36 @@ def load_data():
     global df, ALL_INGREDIENTS
     try:
         print("Загрузка данных...")
-        df = pd.read_csv("povarenok_recipes.csv")
+        DB_USER = 'postgres'
+        DB_PASSWORD = 'JohnnyCage29'
+        DB_HOST = '127.0.0.1'
+        DB_PORT = '5432'
+        DB_NAME = 'recipes'
 
-        if 'url' in df.columns:
-            df = df.drop(columns=["url"])
-        df["ingredients"] = df["ingredients"].fillna("").astype(str)
-        df["ingredients"] = df["ingredients"].apply(clean_ingredients)
+        engine = create_engine(f"postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}")
 
-        trash_names = ['Курица, запеченная на соли', 'Целая курица без косточек', 'Как достать кости из курицы']
-        for name in trash_names:
-            df = df[df["name"] != name]
+        query = "SELECT name, ingredients, instructions FROM newtable"
 
-        df = df[df["ingredients"] != ""]
-        df = df.reset_index(drop=True)
+        df = pd.read_sql(query, con=engine)
+        df = pd.read_csv("recipes_main.csv", encoding='utf-8-sig', quotechar='"', skipinitialspace=True)
 
         all_ings_set = set()
         for ing_string in df['ingredients']:
-            for ing in ing_string.split():
-                all_ings_set.add(ing)
+            # Разделяем строку на отдельные ингредиенты
+            raw_ingredients = ing_string.split("|")
+
+            for ing in raw_ingredients:
+                clean_ing = re.split(r'[—–\-]', ing)[0]
+
+                clean_ing = clean_ing.strip().lower().replace('.', '')
+
+                if clean_ing and len(clean_ing) > 1:  # Игнорируем пустые и одиночные символы
+                    all_ings_set.add(clean_ing)
 
         ALL_INGREDIENTS = sorted(list(all_ings_set))
         print(f"Загружено {len(df)} рецептов и {len(ALL_INGREDIENTS)} уникальных ингредиентов.")
+        df['ingredients'] = df['ingredients'].fillna("").apply(clean_ingredients)
+        df = df[df['ingredients'] != ""].reset_index(drop=True)
 
     except Exception as e:
         print(f"Ошибка загрузки данных: {e}")
@@ -184,8 +144,8 @@ def recommend():
     data = request.json
     user_fridge = data.get('products', [])
 
-    strict_res = recommend_strict(user_fridge, top_n=5)
-    extra_res = recommend_with_extras(user_fridge, top_n=5)
+    strict_res = recommend_strict(df,user_fridge, top_n=5)
+    extra_res = recommend_with_extras(df, user_fridge, top_n=5)
 
     return jsonify({
         "strict": strict_res,
