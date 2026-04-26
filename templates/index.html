@@ -23,9 +23,12 @@
         .fridge-item { background: var(--primary); color: white; padding: 8px 15px; border-radius: 20px; display: flex; align-items: center; gap: 8px; font-size: 14px; }
         .fridge-item span { cursor: pointer; font-weight: bold; }
 
-        /* Кнопка */
-        .btn-find { display: block; width: 200px; margin: 20px auto; padding: 15px; background: #2c3e50; color: white; border: none; border-radius: 25px; font-size: 18px; cursor: pointer; transition: 0.3s; }
+        /* Кнопки */
+        .btn-row { display: flex; justify-content: center; gap: 15px; margin: 20px auto; flex-wrap: wrap; }
+        .btn-find { padding: 15px 30px; background: #2c3e50; color: white; border: none; border-radius: 25px; font-size: 18px; cursor: pointer; transition: 0.3s; }
         .btn-find:hover { background: #34495e; transform: scale(1.05); }
+        .btn-add-recipe { padding: 15px 30px; background: white; color: var(--primary); border: 2px solid var(--primary); border-radius: 25px; font-size: 18px; cursor: pointer; transition: 0.3s; }
+        .btn-add-recipe:hover { background: #e8f5e9; transform: scale(1.05); }
 
         /* Результаты */
         .results-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; margin-top: 30px; }
@@ -37,12 +40,89 @@
 
         .section-title { border-bottom: 2px solid #ddd; padding-bottom: 10px; margin-top: 40px; }
         .loader { text-align: center; display: none; color: #666; }
+
+        /* ====== Модальное окно ====== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.45);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-overlay.active { display: flex; }
+
+        .modal {
+            background: white;
+            border-radius: 20px;
+            padding: 36px 40px;
+            width: 100%;
+            max-width: 520px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            position: relative;
+            animation: slideUp 0.25s ease;
+        }
+        @keyframes slideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to   { transform: translateY(0);   opacity: 1; }
+        }
+
+        .modal h2 { margin-top: 0; color: #2c3e50; font-size: 22px; }
+
+        .modal-close {
+            position: absolute;
+            top: 16px; right: 20px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #aaa;
+            background: none;
+            border: none;
+            line-height: 1;
+        }
+        .modal-close:hover { color: #555; }
+
+        .form-group { margin-bottom: 18px; }
+        .form-group label { display: block; margin-bottom: 6px; font-weight: 600; color: #444; font-size: 14px; }
+
+        .form-group input[type="text"],
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 12px;
+            font-size: 15px;
+            outline: none;
+            box-sizing: border-box;
+            font-family: inherit;
+            transition: border-color 0.2s;
+            resize: vertical;
+        }
+        .form-group input[type="text"]:focus,
+        .form-group textarea:focus { border-color: var(--primary); }
+
+        /* Теги ингредиентов внутри формы */
+        .ing-tags { display: flex; flex-wrap: wrap; gap: 8px; min-height: 38px; margin-bottom: 8px; }
+        .ing-tag { background: var(--primary); color: white; padding: 5px 12px; border-radius: 15px; font-size: 13px; display: flex; align-items: center; gap: 6px; }
+        .ing-tag span { cursor: pointer; font-weight: bold; }
+
+        .ing-add-row { display: flex; gap: 8px; }
+        .ing-add-row input { flex: 1; border-radius: 12px; }
+        .btn-ing-add { padding: 12px 18px; background: var(--primary); color: white; border: none; border-radius: 12px; font-size: 15px; cursor: pointer; white-space: nowrap; }
+        .btn-ing-add:hover { background: #43a047; }
+
+        .btn-submit { width: 100%; padding: 14px; background: #2c3e50; color: white; border: none; border-radius: 25px; font-size: 17px; cursor: pointer; margin-top: 8px; transition: 0.2s; }
+        .btn-submit:hover { background: #34495e; }
+
+        .modal-msg { text-align: center; margin-top: 12px; font-size: 14px; min-height: 20px; }
+        .modal-msg.success { color: var(--primary); }
+        .modal-msg.error   { color: #e74c3c; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1> Что приготовить?</h1>
+    <h1>🍳 Что приготовить?</h1>
     <p style="text-align: center; color: #666;">Выберите продукты, которые у вас есть в холодильнике</p>
 
     <!-- Поиск -->
@@ -52,25 +132,60 @@
         <div class="suggestions" id="suggestionsBox"></div>
     </div>
 
-    <div class="fridge" id="fridgeList">
-    </div>
+    <div class="fridge" id="fridgeList"></div>
     <div style="text-align: center; color: #999; font-size: 13px;" id="countDisplay">Выбрано: 0</div>
 
-    <button class="btn-find" onclick="findRecipes()">Найти рецепты</button>
+    <!-- Кнопки -->
+    <div class="btn-row">
+        <button class="btn-find" onclick="findRecipes()">🔍 Найти рецепты</button>
+        <button class="btn-add-recipe" onclick="openModal()">➕ Добавить рецепт</button>
+    </div>
+
     <div class="loader" id="loader">Ищем лучшие рецепты...</div>
 
     <div id="resultsArea">
-        <h2 class="section-title"> Можно приготовить сразу</h2>
+        <h2 class="section-title">✅ Можно приготовить сразу</h2>
         <div class="results-grid" id="strictResults"></div>
 
-        <h2 class="section-title"> Нужно докупить (1-2 продукта)</h2>
+        <h2 class="section-title">🛒 Нужно докупить (1-2 продукта)</h2>
         <div class="results-grid" id="extraResults"></div>
+    </div>
+</div>
+
+<!-- ====== Модальное окно добавления рецепта ====== -->
+<div class="modal-overlay" id="modalOverlay" onclick="handleOverlayClick(event)">
+    <div class="modal">
+        <button class="modal-close" onclick="closeModal()" title="Закрыть">&times;</button>
+        <h2>📝 Новый рецепт</h2>
+
+        <div class="form-group">
+            <label for="recipeName">Название блюда *</label>
+            <input type="text" id="recipeName" placeholder="Например: Борщ со сметаной">
+        </div>
+
+        <div class="form-group">
+            <label>Ингредиенты *</label>
+            <div class="ing-tags" id="ingTags"></div>
+            <div class="ing-add-row">
+                <input type="text" id="ingInput" placeholder="Добавить ингредиент..." onkeydown="ingKeyDown(event)">
+                <button class="btn-ing-add" onclick="addIngTag()">+ Добавить</button>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="recipeDesc">Описание / способ приготовления</label>
+            <textarea id="recipeDesc" rows="4" placeholder="Опишите шаги приготовления (необязательно)..."></textarea>
+        </div>
+
+        <button class="btn-submit" onclick="submitRecipe()">💾 Сохранить рецепт</button>
+        <div class="modal-msg" id="modalMsg"></div>
     </div>
 </div>
 
 <script>
     let allIngredients = [];
     let myFridge = [];
+    let modalIngredients = [];
 
     // 1. Загрузка списка ингредиентов при старте
     fetch('/api/ingredients')
@@ -80,29 +195,23 @@
             console.log(`Загружено ${allIngredients.length} ингредиентов`);
         });
 
-    // 2. Логика поиска (Автокомплит)
+    // 2. Автокомплит поиска
     const input = document.getElementById('ingredientInput');
     const suggestionsBox = document.getElementById('suggestionsBox');
 
     input.addEventListener('input', function() {
         const val = this.value.toLowerCase();
         suggestionsBox.innerHTML = '';
-        
-        if (!val) { 
-            suggestionsBox.style.display = 'none'; 
-            return; 
-        }
+        if (!val) { suggestionsBox.style.display = 'none'; return; }
 
-        // Фильтруем список: проверяем, начинается ли строка с val
         const matches = allIngredients
-            .filter(ing => ing.toLowerCase().startsWith(val)) 
+            .filter(ing => ing.toLowerCase().startsWith(val))
             .slice(0, 30);
 
         if (matches.length > 0) {
             suggestionsBox.style.display = 'block';
             matches.forEach(match => {
                 const div = document.createElement('div');
-                // Заменяем _ на пробел для отображения
                 div.textContent = match.replace(/_/g, ' ');
                 div.onclick = () => {
                     addToFridge(match);
@@ -116,12 +225,11 @@
         }
     });
 
-    // Скрыть подсказки при клике вне
     document.addEventListener('click', function(e) {
         if (e.target !== input) suggestionsBox.style.display = 'none';
     });
 
-    // 3. Добавление в холодильник
+    // 3. Холодильник
     function addToFridge(ing) {
         if (!myFridge.includes(ing)) {
             myFridge.push(ing);
@@ -146,12 +254,9 @@
         document.getElementById('countDisplay').textContent = `Выбрано: ${myFridge.length}`;
     }
 
-    // 4. Отправка запроса на бэкенд
+    // 4. Поиск рецептов
     function findRecipes() {
-        if (myFridge.length === 0) {
-            alert("Выберите хотя бы один продукт!");
-            return;
-        }
+        if (myFridge.length === 0) { alert("Выберите хотя бы один продукт!"); return; }
 
         document.getElementById('loader').style.display = 'block';
         document.getElementById('strictResults').innerHTML = '';
@@ -181,25 +286,113 @@
             container.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #999;">Ничего не найдено 😔</p>';
             return;
         }
-
         recipes.forEach(r => {
             const card = document.createElement('div');
             card.className = 'card';
-
-            let ingredientsHtml = '';
-            if (isStrict) {
-                ingredientsHtml = `<p><small>${r.ingredients}</small></p>`;
-            } else {
-                ingredientsHtml = `<div class="missing"> Докупить: ${r.missing.join(', ')}</div>`;
-            }
-
+            let ingredientsHtml = isStrict
+                ? `<p><small>${r.ingredients}</small></p>`
+                : `<div class="missing">🛒 Докупить: ${r.missing.join(', ')}</div>`;
             card.innerHTML = `
-                <h3>${r.name} <span class="score">${isStrict ? '100%' : Math.round(r.score*100) + '%'}</span></h3>
+                <h3>${r.name} <span class="score">${isStrict ? '100%' : Math.round(r.score * 100) + '%'}</span></h3>
                 ${ingredientsHtml}
                 ${!isStrict ? `<p>Ваших продуктов: <b>${r.found_count}</b></p>` : ''}
             `;
             container.appendChild(card);
         });
+    }
+
+    // ====== Модальное окно ======
+
+    function openModal() {
+        modalIngredients = [];
+        document.getElementById('recipeName').value = '';
+        document.getElementById('ingInput').value = '';
+        document.getElementById('recipeDesc').value = '';
+        document.getElementById('modalMsg').textContent = '';
+        document.getElementById('modalMsg').className = 'modal-msg';
+        renderIngTags();
+        document.getElementById('modalOverlay').classList.add('active');
+    }
+
+    function closeModal() {
+        document.getElementById('modalOverlay').classList.remove('active');
+    }
+
+    function handleOverlayClick(e) {
+        if (e.target === document.getElementById('modalOverlay')) closeModal();
+    }
+
+    // Escape закрывает модалку
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') closeModal();
+    });
+
+    // Теги ингредиентов в форме
+    function addIngTag() {
+        const val = document.getElementById('ingInput').value.trim();
+        if (!val) return;
+        if (!modalIngredients.includes(val)) {
+            modalIngredients.push(val);
+            renderIngTags();
+        }
+        document.getElementById('ingInput').value = '';
+        document.getElementById('ingInput').focus();
+    }
+
+    function removeIngTag(ing) {
+        modalIngredients = modalIngredients.filter(i => i !== ing);
+        renderIngTags();
+    }
+
+    function ingKeyDown(e) {
+        if (e.key === 'Enter') { e.preventDefault(); addIngTag(); }
+    }
+
+    function renderIngTags() {
+        const container = document.getElementById('ingTags');
+        container.innerHTML = '';
+        modalIngredients.forEach(ing => {
+            const div = document.createElement('div');
+            div.className = 'ing-tag';
+            div.innerHTML = `${ing} <span onclick="removeIngTag('${ing}')">&times;</span>`;
+            container.appendChild(div);
+        });
+    }
+
+    // Отправка нового рецепта
+    function submitRecipe() {
+        const name = document.getElementById('recipeName').value.trim();
+        const description = document.getElementById('recipeDesc').value.trim();
+        const msgEl = document.getElementById('modalMsg');
+
+        if (!name) { showMsg('Введите название блюда', 'error'); return; }
+        if (modalIngredients.length === 0) { showMsg('Добавьте хотя бы один ингредиент', 'error'); return; }
+
+        fetch('/api/add_recipe', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                name: name,
+                ingredients: modalIngredients,
+                description: description
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.error) {
+                showMsg(data.error, 'error');
+            } else {
+                showMsg(`✅ Рецепт «${data.name}» сохранён!`, 'success');
+                setTimeout(closeModal, 1800);
+            }
+        })
+        .catch(() => showMsg('Ошибка соединения с сервером', 'error'));
+    }
+
+    function showMsg(text, type) {
+        const el = document.getElementById('modalMsg');
+        el.textContent = text;
+        el.className = `modal-msg ${type}`;
     }
 </script>
 
