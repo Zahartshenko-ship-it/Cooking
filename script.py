@@ -39,7 +39,7 @@ def build_ingredients_list(df_source):
     for ing_string in df_source['ingredients']:
         if not isinstance(ing_string, str):
             continue
-        raw_ingredients = ing_string.split("|")
+        raw_ingredients = ing_string.split()
         for ing in raw_ingredients:
             clean_ing = re.split(r'[—–\-]', ing)[0]
             clean_ing = clean_ing.strip().lower().replace('.', '')
@@ -117,7 +117,7 @@ def load_data():
     try:
         print("Загрузка данных из БД...")
         engine = get_engine()
-        df = pd.read_sql("SELECT name, ingredients FROM newtable", con=engine)
+        df = pd.read_sql("SELECT name, ingredients FROM recipes", con=engine)
         print(f"Загружено {len(df)} рецептов из БД.")
     except Exception as e:
         print(f"Ошибка подключения к БД, пробуем CSV: {e}")
@@ -129,9 +129,6 @@ def load_data():
             df = pd.DataFrame(columns=['name', 'ingredients'])
 
     ALL_INGREDIENTS = build_ingredients_list(df)
-
-    df['ingredients'] = df['ingredients'].fillna("").apply(clean_ingredients)
-    df = df[df['ingredients'] != ""].reset_index(drop=True)
 
     print(f"Готово: {len(df)} рецептов, {len(ALL_INGREDIENTS)} уникальных ингредиентов.")
 
@@ -194,8 +191,8 @@ def add_recipe():
     if not ingredients_list:
         return jsonify({"error": "Список ингредиентов не может быть пустым"}), 400
 
-    # Нормализуем ингредиенты в формат БД: "Лук | Курица | Картофель"
-    ingredients_pipe = " | ".join(ing.capitalize() for ing in ingredients_list)
+    # Нормализуем ингредиенты в формат БД: "Лук Курица Картофель"
+    ingredients_pipe = "  ".join(ing.capitalize() for ing in ingredients_list)
 
     # Нормализуем в формат поиска: "картофель курица лук"
     normalized = " ".join(sorted(
@@ -208,7 +205,7 @@ def add_recipe():
         with engine.connect() as conn:
             conn.execute(
                 text("""
-                    INSERT INTO newtable (name, ingredients, instructions)
+                    INSERT INTO recipes (name, ingredients, instructions)
                     VALUES (:name, :ingredients, :instructions)
                 """),
                 {
