@@ -117,6 +117,34 @@
         .modal-msg { text-align: center; margin-top: 12px; font-size: 14px; min-height: 20px; }
         .modal-msg.success { color: var(--primary); }
         .modal-msg.error   { color: #e74c3c; }
+        .card {
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+        }
+
+        /* Модалка деталей рецепта */
+        .detail-instructions {
+            white-space: pre-wrap;
+            line-height: 1.7;
+            color: #444;
+            font-size: 15px;
+            max-height: 50vh;
+            overflow-y: auto;
+            background: #f9f9f9;
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 12px;
+        }
+        .detail-ingredients {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin: 12px 0;
+        }
     </style>
 </head>
 <body>
@@ -179,6 +207,15 @@
 
         <button class="btn-submit" onclick="submitRecipe()">💾 Сохранить рецепт</button>
         <div class="modal-msg" id="modalMsg"></div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="detailOverlay" onclick="handleDetailOverlayClick(event)">
+    <div class="modal" style="max-width: 580px;">
+        <button class="modal-close" onclick="closeDetail()" title="Закрыть">&times;</button>
+        <h2 id="detailName" style="padding-right: 30px;"></h2>
+        <div class="detail-ingredients" id="detailIngredients"></div>
+        <div class="detail-instructions" id="detailInstructions"></div>
     </div>
 </div>
 
@@ -289,6 +326,8 @@
         recipes.forEach(r => {
             const card = document.createElement('div');
             card.className = 'card';
+            card.onclick = () => openDetail(r.name);
+
             let ingredientsHtml = isStrict
                 ? `<p><small>${r.ingredients}</small></p>`
                 : `<div class="missing">🛒 Докупить: ${r.missing.join(', ')}</div>`;
@@ -324,8 +363,9 @@
 
     // Escape закрывает модалку
     document.addEventListener('keydown', e => {
-        if (e.key === 'Escape') closeModal();
+    if (e.key === 'Escape') { closeModal(); closeDetail(); }
     });
+
 
     // Теги ингредиентов в форме
     function addIngTag() {
@@ -393,6 +433,47 @@
         const el = document.getElementById('modalMsg');
         el.textContent = text;
         el.className = `modal-msg ${type}`;
+    }
+
+        // ====== Детали рецепта ======
+    function openDetail(recipeName) {
+        const nameEl = document.getElementById('detailName');
+        const ingsEl = document.getElementById('detailIngredients');
+        const instrEl = document.getElementById('detailInstructions');
+
+        nameEl.textContent = recipeName;
+        ingsEl.innerHTML = '';
+        instrEl.textContent = 'Загрузка...';
+        document.getElementById('detailOverlay').classList.add('active');
+
+        fetch(`/api/recipe/${encodeURIComponent(recipeName)}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.error) {
+                    instrEl.textContent = 'Ошибка: ' + data.error;
+                    return;
+                }
+                // Ингредиенты — теги
+                const ings = data.ingredients.split().filter(Boolean);
+                ings.forEach(ing => {
+                    const span = document.createElement('span');
+                    span.className = 'tag';
+                    span.textContent = ing.replace(/_/g, ' ');
+                    ingsEl.appendChild(span);
+                });
+                instrEl.textContent = data.instructions || 'Описание не указано.';
+            })
+            .catch(() => {
+                instrEl.textContent = 'Ошибка соединения с сервером.';
+            });
+    }
+
+    function closeDetail() {
+        document.getElementById('detailOverlay').classList.remove('active');
+    }
+
+    function handleDetailOverlayClick(e) {
+        if (e.target === document.getElementById('detailOverlay')) closeDetail();
     }
 </script>
 

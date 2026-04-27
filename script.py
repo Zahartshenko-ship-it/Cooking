@@ -236,6 +236,25 @@ def add_recipe():
 
     return jsonify({"status": "ok", "name": name, "ingredients": normalized})
 
+@app.route('/api/recipe/<path:name>')
+def get_recipe(name):
+    try:
+        engine = get_engine()
+        with engine.connect() as conn:
+            result = conn.execute(
+                text("SELECT name, ingredients, instructions FROM recipes WHERE name = :name LIMIT 1"),
+                {"name": name}
+            )
+            row = result.fetchone()
+        if row:
+            return jsonify({
+                "name": row[0],
+                "ingredients": row[1],
+                "instructions": row[2] or "Описание не указано."
+            })
+        return jsonify({"error": "Рецепт не найден"}), 404
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
