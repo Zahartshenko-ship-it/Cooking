@@ -262,6 +262,14 @@
         }
     });
 
+    input.addEventListener('focus', function() {
+    const val = this.value.toLowerCase();
+    if (!val) return;
+    if (suggestionsBox.children.length > 0) {
+        suggestionsBox.style.display = 'block';
+    }
+    });
+
     document.addEventListener('click', function(e) {
         if (e.target !== input) suggestionsBox.style.display = 'none';
     });
@@ -461,7 +469,7 @@
                     span.textContent = ing.replace(/_/g, ' ');
                     ingsEl.appendChild(span);
                 });
-                instrEl.textContent = data.instructions || 'Описание не указано.';
+                instrEl.textContent = (data.instructions || 'Описание не указано.').replace(/\s*\|\s*/g, ' ');
             })
             .catch(() => {
                 instrEl.textContent = 'Ошибка соединения с сервером.';
