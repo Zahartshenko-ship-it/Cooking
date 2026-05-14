@@ -145,6 +145,20 @@
             gap: 6px;
             margin: 12px 0;
         }
+
+        /* Shake-анимация для поля с ошибкой */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%       { transform: translateX(-6px); }
+            40%       { transform: translateX(6px); }
+            60%       { transform: translateX(-4px); }
+            80%       { transform: translateX(4px); }
+        }
+        .input-error {
+            border-color: #e74c3c !important;
+            animation: shake 0.35s ease;
+        }
+
     </style>
 </head>
 <body>
@@ -377,14 +391,32 @@
 
     // Теги ингредиентов в форме
     function addIngTag() {
-        const val = document.getElementById('ingInput').value.trim();
+        const ingInput = document.getElementById('ingInput');
+        const val = ingInput.value.trim();
+ 
         if (!val) return;
+ 
+        // Запрет пробелов и запятых — только один продукт за раз
+        if (/[,\s]/.test(val)) {
+            showMsg('Вводите только один продукт — пробелы и запятые не допускаются. Если нужен пробел в названии продукта - используйте _', 'error');
+            ingInput.classList.remove('input-error');
+            // Перезапускаем анимацию (если уже была)
+            void ingInput.offsetWidth;
+            ingInput.classList.add('input-error');
+            ingInput.focus();
+            return;
+        }
+ 
         if (!modalIngredients.includes(val)) {
             modalIngredients.push(val);
             renderIngTags();
         }
-        document.getElementById('ingInput').value = '';
-        document.getElementById('ingInput').focus();
+ 
+        // Сбрасываем ошибку при успешном добавлении
+        showMsg('', '');
+        ingInput.classList.remove('input-error');
+        ingInput.value = '';
+        ingInput.focus();
     }
 
     function removeIngTag(ing) {
