@@ -34,6 +34,11 @@ def load_data():
 
 load_data()
 
+@app.route('/api/reload', methods=['POST'])
+def reload_data():
+    load_data()
+    return jsonify({"status": "ok", "recipes": len(df)})
+
 
 # =============================
 # Маршруты (Routes)
