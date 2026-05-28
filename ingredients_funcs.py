@@ -9,7 +9,7 @@ def build_ingredients_list(df_source):
         raw_ingredients = ing_string.split()
         for ing in raw_ingredients:
             clean_ing = re.split(r'[—–\-]', ing)[0]
-            clean_ing = clean_ing.strip().lower().replace('.', '')
+            clean_ing = clean_ing.strip().lower().replace('.', '').replace('_', ' ')
             if clean_ing and len(clean_ing) > 1:
                 all_ings_set.add(clean_ing)
     return sorted(list(all_ings_set))
