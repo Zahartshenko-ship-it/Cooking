@@ -1,0 +1,464 @@
+:root {
+    --primary: #021128;
+    --primary-dark: #f9fbfc;
+    --bg-gradient: linear-gradient(135deg, #f9fbfc 0%, #f9fbfc 100%);
+    --white: #ffffff;
+    --text-main: #1e293b;
+    --text-secondary: #1e293b;
+    --accent-pink: #262b29;
+    --card-shadow: 0 10px 30px rgba(248, 23, 23, 0.08);
+    --radius: 25px;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+@font-face {
+    font-family: 'MyCustomFont'; /* Придумай любое имя (лучше на английском) */
+    src: url('/static/fonts/2.ttf') format('truetype'); /* Путь к файлу и его формат */
+    font-weight: normal;
+    font-style: normal;
+}
+
+body {
+    font-family: 'MyCustomFont', sans-serif;
+    background-color: #7fdfff4f; /* Теплый темный цвет (HEX) */
+    background-attachment: fixed;
+    margin: 0;
+    color: var(--text-main);
+    min-height: 100vh;
+}
+
+.burger-img {
+    display: block;      
+    margin: 0 auto;      
+    margin-top: 10px;    /* Сдвигает бургер вниз, чтобы он идеально сидел под дугой */
+    width: 100%;         
+    max-width: 400px;    
+    height: auto;        
+    border-radius: 8px;  
+}
+
+.logo { font-weight: 800; font-size: 24px; color: var(--primary); display: flex; align-items: center; cursor: pointer; }
+.nav-links { display: flex; gap: 20px; }
+.nav-links a { 
+    text-decoration: none; 
+    color: var(--text-secondary); 
+    font-weight: 600; 
+    font-size: 13px; 
+    text-transform: uppercase; 
+    padding: 8px 12px;
+    border-radius: 8px;
+    transition: 0.2s;
+}
+.nav-links a.active { background: var(--primary); color: white; }
+.auth-btns button { 
+    border: none; padding: 8px 20px; border-radius: 15px; cursor: pointer; font-weight: 600; 
+}
+.btn-reg { background: var(--primary); color: white; margin-left: 10px; }
+
+/* --- Основной контейнер (Сетка как на картинке) --- */
+.main-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    max-width: 2400px;
+    margin: 40px auto;
+    gap: 30px;
+    padding: 0 20px;
+}
+
+
+
+.column {
+    padding: 30px;
+    min-height: 600px;
+}
+
+h2 {
+    text-align: center;
+    color: var(--primary);
+    text-transform: uppercase;
+    font-size: 18px;
+    letter-spacing: 1.2px;
+    margin-bottom: 25px;
+}
+
+/* --- Левая колонка: Ввод --- */
+.search-group {
+    display: flex;
+    align-items: center; 
+    margin: 40px auto 20px auto; 
+    max-width: 650px;    /* Ширина, чтобы обе кнопки и инпут дышали свободно */
+    width: 100%; 
+    gap: -10px;     
+}
+
+.floating-fridge {
+    position: fixed;
+    bottom: 30px;
+    right: 35px;
+    width: 65px;
+    height: 35px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 1000;
+    transition: transform 0.2s ease;
+}
+
+.floating-fridge:hover {
+    transform: scale(1.1);
+}
+
+.fridge-icon-img {
+    width: 70px;        /* Уменьшили сам холодильник с 70px до 55px */
+    height: 55px;
+    object-fit: contain;
+    display: block;
+    pointer-events: none;
+    /* Оставляем мягкую тень */
+    filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.15)); 
+}
+
+/* Красный кружок-счетчик количества продуктов */
+.fridge-counter {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background-color: #ff4d4f;
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+    padding: 3px 8px;
+    border-radius: 10px;
+    border: 2px solid #ffffff;
+}
+
+/* Анимация покачивания при добавлении */
+@keyframes jiggle {
+    0% { transform: scale(1); }
+    30% { transform: scale(1.2) rotate(-10deg); }
+    50% { transform: scale(1.2) rotate(10deg); }
+    70% { transform: scale(1.2) rotate(-10deg); }
+    100% { transform: scale(1); }
+}
+
+.floating-fridge.pulse {
+    animation: jiggle 0.5s ease-in-out;
+}
+
+/* --- Выплывающая шторка (меню) --- */
+.fridge-drawer {
+    position: fixed;
+    top: 0;
+    right: -350px; /* Изначально спрятана справа за экраном */
+    width: 320px;
+    height: 100%;
+    background: white;
+    box-shadow: -5px 0 25px rgba(0,0,0,0.15);
+    z-index: 999;
+    transition: right 0.3s ease; /* Плавное выдвижение */
+    padding: 20px;
+    box-sizing: border-box;
+    overflow-y: auto;
+}
+
+/* Класс, который выдвигает шторку (добавляется через JS) */
+.fridge-drawer.open {
+    right: 0;
+}
+
+.drawer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+
+.close-drawer {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+
+/* --- Выпадающий список подсказок (Подборка) --- */
+.suggestions {
+    position: absolute;
+    top: 600px;            /* Опускает список ровно под строку ввода */
+    left: 240px;              /* Выравнивает по левому краю инпута */
+    
+    /* Ширина списка. Так как инпут занимает flex: 1, 
+       сделаем подсказки примерно на ширину самого текстового поля */
+    width: 60%;
+    display: none;           
+    
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 15px;  /* Мягкое скругление углов */
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.921); /* Мягкая тень, чтобы приподнять над сайтом */
+    
+    max-height: 220px;    /* Ограничиваем высоту, если совпадений много */
+    overflow-y: auto;     /* Включает скролл внутри списка */
+    z-index: 999;         /* Выносит список поверх холодильника и карточек */
+    margin-top: 5px;      /* Небольшой аккуратный зазор от инпута */
+}
+
+/* Стили для самих элементов списка (заодно добавим внутренние отступы) */
+.suggestion-item {
+    padding: 10px 15px;      /* Внутренние отступы: 10px сверху/снизу, 15px слева/справа */
+    cursor: pointer;         /* Меняем курсор при наведении */
+    transition: background-color 0.2s ease; /* Плавное изменение цвета */
+}
+
+/* Эффект при наведении */
+.suggestion-item:hover {
+    background-color: #f5f5f5; /* Светло-серый цвет фона при наведении */
+}
+
+
+input[type="text"] {
+    flex: 1;
+    padding: 12px 30px 12px 20px; 
+    border: 1px solid #e0e0e000;
+    border-radius: 25px 0 0 25px; /* Сделали левый край инпута еще более круглым, под стать кнопкам */
+    font-size: 14px;
+    outline: none;
+    height: 46px;                 /* Единая высота для всей строки */
+    box-sizing: border-box;
+    border-right: none;
+    position: relative;
+    z-index: 1;
+}
+
+/* Общие базовые стили для обеих кнопок, чтобы они были одинаковыми */
+.btn-add, .btn-find-recipes {
+    height: 46px;
+    border: none;
+    border-radius: 25px 0 0 25px;          /* Обе кнопки — идеальные округлые капсулы */
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    white-space: nowrap;
+    box-sizing: border-box;
+    position: relative;           /* Включаем позиционирование для работы z-index */
+    transition: all 0.2s ease;
+}
+
+/* Кнопка "Добавить" (Черная капсула, которую обрезают) */
+.btn-add {
+    background: #8ab5e0e6;          
+    color: white;
+    /* Справа делаем отступ чуть больше (35px), чтобы спрятанный под соеднюю кнопку край не сжимал текст */
+    padding: 0 35px 0 25px;       
+    
+    z-index: 2;                   /* Средний слой */
+    margin-left: -20px;           /* Наплыв на инпут */
+    margin-right: -30px;          /* Отрицательный отступ заставляет голубую кнопку наехать СВЕРХУ */
+}
+
+/* Кнопка "Найти рецепты" (Голубая капсула, которая ОБРЕЗАЕТ) */
+.btn-find-recipes {
+    background: #7cb9e8;          
+    color: white;
+    padding: 0 25px;              /* Стандартный аккуратный отступ */
+    
+    z-index: 3;                   /* Самый ВЫСОКИЙ слой — ложится поверх и обрезает черную */
+    
+    /* Мягкая тень от закругленного левого края голубой кнопки на черную */
+    box-shadow: -6px 0 12px rgba(16, 24, 32, 0.25); 
+}
+
+/* Эффекты наведения */
+.btn-add:hover { background: #5b89ca; }
+.btn-find-recipes:hover { 
+    opacity: 0.95; 
+    box-shadow: -8px 0 16px rgba(16, 24, 32, 0.35); 
+}
+
+.fridge-list { 
+    flex-grow: 1; 
+    max-width: 400px;  /* Максимальная ширина списка. Можешь поставить 450px или 500px */
+    width: 100%;
+}
+.fridge-item {
+    background: #f8f9ff;
+    margin-bottom: 10px;
+    padding: 12px 20px;
+    border-radius: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-left: 4px solid var(--primary);
+    animation: fadeIn 0.3s ease;
+}
+
+.remove-btn {
+    background: var(--accent-pink);
+    color: white;
+    border: none;
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+/* Этот стиль применится ко всем кнопкам с классом .btn-find-recipes */
+.btn-find-recipes {
+    background-color: #69a9c5;    /* Темный фон кнопки */
+    color: #ffffff;               /* Белый текст */
+    border: 2px solid #8ab5e0e6;    /* Тонкая голубая обводка */
+    
+    padding: 10px 20px;           /* Внутренние отступы */
+    font-size: 16px;              /* Размер текста */
+    font-weight: 600;             /* Жирность текста */
+    border-radius: 25px;           /* Скругление углов */
+    cursor: pointer;              /* Курсор-пальчик при наведении */
+    text-decoration: none;   
+    transition: all 0.3s ease;    /* Плавность анимации */
+}
+
+
+
+/* --- Правая колонка: Рецепты --- */
+
+/* 1. Модифицированная карточка (изменили display на колонку и добавили transition) */
+.recipe-card {
+    display: flex;
+    flex-direction: column; /* Элементы внутри строятся вертикально */
+    gap: 0;                 
+    background: #ffffff;
+    padding: 15px;
+    border-radius: 20px;
+    margin-bottom: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease; /* Сделали анимацию плавной */
+    border: 1px solid transparent;
+}
+.recipe-card:hover { border-color: var(--accent-pink); background: #ffffff; }
+
+/* Эффект, когда карточка развернута (из нового) */
+.recipe-card.expanded {
+    border-color: var(--accent-pink);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.04);
+}
+
+/* Новому контейнеру задаем флекс в строчку, чтобы картинка и текст были рядом */
+.recipe-main-content {
+    display: flex;
+    gap: 15px;
+    width: 100%;
+}
+
+/* ТВОИ СТИЛИ (Остались без изменений) */
+.recipe-img {
+    width: 70px; height: 70px;
+    border-radius: 15px;
+    background: #dfdddd00;
+    object-fit: cover;
+}
+
+.recipe-info {
+    flex: 1; /* Чтобы текст занимал всю ширину до тегов */
+}
+.recipe-info h3 { margin: 0; font-size: 16px; color: #2d3436; }
+.recipe-info p { margin: 5px 0; font-size: 12px; color: var(--text-secondary); }
+.recipe-meta { display: flex; justify-content: space-between; align-items: center; margin-top: 5px; }
+.time-tag { color: var(--primary); font-weight: 700; font-size: 12px; }
+.match-tag { color: #f3f3f3; font-weight: 600; font-size: 11px; background: #141311; padding: 2px 8px; border-radius: 10px; }
+
+
+/* НОВЫЕ СТИЛИ (Добавились для скрытого блока инструкции) */
+.recipe-instructions {
+    max-height: 0;
+    overflow: hidden;
+    width: 100%;
+    transition: max-height 0.3s ease, padding 0.3s ease;
+    padding-top: 0; 
+    box-sizing: border-box;
+}
+
+.instructions-divider {
+    border: 0;
+    border-top: 1px solid #eee;
+    margin: 10px 0;
+}
+
+.recipe-instructions h4 {
+    margin: 0 0 5px 0;
+    font-size: 14px;
+    color: #2d3436;
+}
+
+.instructions-text {
+    margin: 0;
+    font-size: 13px;
+    color: #555;
+    line-height: 1.6;
+    white-space: pre-wrap; /* Чтобы перенос строк из базы работал */
+}
+.empty-state {
+    text-align: center;
+    margin-top: 100px;
+    color: #b2bec300;
+    font-style: italic;
+}
+
+/* --- Модалки (Стиль как на макете) --- */
+.modal { border-radius: 30px; border: none; }
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+/* --- Стили для заставки --- */
+#intro-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background-color: #000000; /* Черный экран */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 99999; /* Поверх абсолютно всего */
+    transition: transform 0.8s cubic-bezier(0.77, 0, 0.175, 1); /* Красивый плавный уезд */
+}
+
+/* Класс, который заставит экран уехать вверх */
+#intro-screen.hidden {
+    transform: translateY(-100%);
+}
+
+.intro-logo {
+    font-weight: 800;
+    font-size: 42px; /* Крупный логотип для заставки */
+    color: #ffffff;  /* Белый текст на черном фоне */
+    letter-spacing: 2px;
+    animation: pulse 2s infinite ease-in-out;
+
+    /* Новые стили для выравнивания картинки и текста в одну строку */
+    display: flex;
+    align-items: center;       /* Центрирует картинку и текст по вертикали */
+    justify-content: center;   /* Центрирует весь логотип по экрану (если нужно) */
+    gap: 15px;                 /* Расстояние между картинкой и текстом */
+}
+
+/* Стили для самой картинки внутри логотипа */
+.intro-logo img {
+    height: 50px;              /* Высота картинки (чуть больше размера шрифта 42px) */
+    width: auto;               /* Ширина подстроится автоматически */
+    object-fit: contain;
+}
+
+
+/* Легкая анимация пульсации для логотипа, пока сайт думает */
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 0.8; }
+    50% { transform: scale(1.05); opacity: 1; }
+    100% { transform: scale(1); opacity: 0.8; }
+}

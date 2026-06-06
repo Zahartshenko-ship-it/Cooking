@@ -5,7 +5,7 @@ from recomend_algorithms import recommend_strict, recommend_with_extras
 from ingredients_funcs import build_ingredients_list
 from db_init import get_engine
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static', static_url_path='/static')
 
 df = None
 ALL_INGREDIENTS = []
@@ -33,16 +33,6 @@ def load_data():
 
 
 load_data()
-
-@app.route('/api/reload', methods=['POST'])
-def reload_data():
-    load_data()
-    return jsonify({"status": "ok", "recipes": len(df)})
-
-
-# =============================
-# Маршруты (Routes)
-# =============================
 
 @app.route('/')
 def index():
@@ -161,4 +151,4 @@ def get_recipe(name):
         return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    app.run(debug=True, port=8080)
