@@ -58,7 +58,41 @@
         </div>
 </div>
 
+<div class="recipe-form-hero">
+    
+    <div class="recipe-form-container">
+        <h2>ДОБАВИТЬ РЕЦЕПТ В ДОМИК</h2>
+        <form id="recipeForm">
+            
+            <div class="form-group">
+                <label for="recipeName">Название блюда</label>
+                <input type="text" id="recipeName" required placeholder="Например, Пряники">
+            </div>
 
+            <div class="form-group">
+                <label>Ингредиенты</label>
+                <div id="ingredientsList">
+                    <div class="ingredient-input-wrap">
+                        <input type="text" class="ingredient-input" placeholder="Мука, корица..." required>
+                        <button type="button" class="remove-ing-btn" onclick="this.parentElement.remove()">✕</button>
+                    </div>
+                </div>
+                <button type="button" id="addIngredientBtn">+ Добавить ингредиент</button>
+            </div>
+
+            <div class="form-group">
+                <label for="recipeDescription">Инструкция / Описание</label>
+                <textarea id="recipeDescription" rows="4" placeholder="Смешать, выпекать с любовью..."></textarea>
+            </div>
+
+            <button type="submit" id="submitBtn">Сохранить рецепт</button>
+        </form>
+        
+        <div id="formMessage" class="hidden"></div>
+    </div>
+</div>
+
+<script src="/static/codes/recipe.js"></script>
 <script src="/static/codes/code.js"></script>
 
 </body>

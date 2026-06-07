@@ -462,3 +462,126 @@ input[type="text"] {
     50% { transform: scale(1.05); opacity: 1; }
     100% { transform: scale(1); opacity: 0.8; }
 }
+
+/* Общий контейнер-родитель, который держит и картинку, и форму */
+.recipe-form-hero {
+    position: relative;
+    max-width: 550px; /* Этим параметром регулируй общую ширину домика */
+    margin: 40px auto;
+}
+
+/* Стили для самой картинки из HTML */
+.gingerbread-bg-img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* Контейнер формы, который накладывается ПОВЕРХ картинки */
+.recipe-form-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    
+    /* Делаем внутренние отступы, чтобы форма сжалась к центру домика */
+    padding: 30px; 
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Центрируем форму по вертикали */
+    font-family: Arial, sans-serif;
+}
+
+/* Заголовок формы */
+.recipe-form-container h2 {
+    text-align: center;
+    color: #4a2306; 
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 20px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    background: rgba(255, 255, 255, 0.85);
+    padding: 10px;
+    border-radius: 8px;
+}
+
+/* Текст подписей */
+.form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: bold;
+    color: #4a2306;
+}
+
+/* Инпуты */
+.form-group input[type="text"], 
+.form-group textarea {
+    width: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+    border: 2px solid #dcd0c0;
+    border-radius: 8px;
+    background-color: #fffefb;
+    color: #4a2306;
+    font-size: 14px;
+}
+
+/* Кнопка плюса */
+#addIngredientBtn {
+    background: #d64545;
+    color: white;
+    border: none;
+    padding: 8px 14px;
+    cursor: pointer;
+    border-radius: 20px;
+    margin-top: 6px;
+    font-weight: bold;
+}
+
+/* Упаковка ингредиентов */
+.ingredient-input-wrap {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+/* Кнопка крестика */
+.remove-ing-btn {
+    background: #5c2e0b;
+    color: #fcead2;
+    border: none;
+    padding: 0 12px;
+    cursor: pointer;
+    border-radius: 6px;
+}
+
+/* Зелёная кнопка Сохранить */
+#submitBtn {
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 8px;
+    width: 100%;
+    margin-top: 10px;
+}
+
+#submitBtn:hover { background: #218838; }
+
+/* Сообщения об ошибках / успехе */
+.message {
+    margin-top: 10px;
+    padding: 8px;
+    border-radius: 6px;
+    text-align: center;
+    font-weight: bold;
+}
+.success { background-color: #d4edda; color: #155724; }
+.error { background-color: #f8d7da; color: #721c24; }
+.hidden { display: none; }
