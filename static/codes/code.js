@@ -15,17 +15,19 @@ input.addEventListener('input', function() {
     suggestionsBox.innerHTML = '';
     if (!val) { suggestionsBox.style.display = 'none'; return; }
 
-    const matches = allIngredients.filter(ing => ing.toLowerCase().startsWith(val)).slice(0, 10);
+    // Сравниваем пробелы с пробелами: убираем подчёркивания у ингредиента
+    const matches = allIngredients
+        .filter(ing => ing.toLowerCase().replace(/_/g, ' ').startsWith(val))
+        .slice(0, 10);
+
     if (matches.length > 0) {
         suggestionsBox.style.display = 'block';
         matches.forEach(match => {
             const div = document.createElement('div');
-            div.className = 'suggestion-item'; // Добавляем класс стиля
-            div.textContent = match;
-            
-            // Клик по подсказке: сразу отправляет целое слово в холодильник!
-            div.onclick = () => { 
-                addToFridge(match); 
+            div.className = 'suggestion-item';
+            div.textContent = match.replace(/_/g, ' '); // Отображаем без подчёркиваний
+            div.onclick = () => {
+                addToFridge(match); // В холодильник идёт оригинал с подчёркиваниями
                 input.value = ''; 
                 suggestionsBox.style.display = 'none'; 
             };
@@ -82,7 +84,7 @@ function renderFridge() {
     myFridge.forEach(ing => {
         const div = document.createElement('div');
         div.className = 'fridge-item';
-        div.innerHTML = `<span>${ing}</span><button class="remove-btn" onclick="removeFromFridge('${ing}')">×</button>`;
+        div.innerHTML = `<span>${ing.replace(/_/g, ' ')}</span><button class="remove-btn" onclick="removeFromFridge('${ing}')">×</button>`;
         container.appendChild(div);
     });
 }
