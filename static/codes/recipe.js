@@ -5,21 +5,41 @@ document.addEventListener('DOMContentLoaded', () => {
     const recipeForm = document.getElementById('recipeForm');
     const formMessage = document.getElementById('formMessage');
 
-    // 1. Динамическое добавление полей для ингредиентов
-    addIngredientBtn.addEventListener('click', () => {
+    // Функция для создания нового ингредиента
+    function createIngredientInput(placeholder = 'Новый ингредиент') {
         const wrapper = document.createElement('div');
         wrapper.className = 'ingredient-input-wrap';
         
         wrapper.innerHTML = `
-            <input type="text" class="ingredient-input" placeholder="Новый ингредиент" required>
+            <input type="text" class="ingredient-input form-input" placeholder="${placeholder}" required>
             <button type="button" class="remove-ing-btn">✕</button>
         `;
         
+        // Добавляем обработчик удаления
         wrapper.querySelector('.remove-ing-btn').addEventListener('click', () => {
-            wrapper.remove();
+            wrapper.style.opacity = '0';
+            wrapper.style.transform = 'translateX(10px)';
+            setTimeout(() => wrapper.remove(), 300);
         });
 
+        // Анимация появления
+        wrapper.style.opacity = '0';
+        wrapper.style.transform = 'translateX(-10px)';
+        
+        return wrapper;
+    }
+
+    // 1. Динамическое добавление полей для ингредиентов
+    addIngredientBtn.addEventListener('click', () => {
+        const wrapper = createIngredientInput('Новый ингредиент');
         ingredientsList.appendChild(wrapper);
+        
+        // Запускаем анимацию
+        setTimeout(() => {
+            wrapper.style.transition = 'all 0.3s ease';
+            wrapper.style.opacity = '1';
+            wrapper.style.transform = 'translateX(0)';
+        }, 10);
     });
 
     // 2. Отправка формы на бэкенд
@@ -54,12 +74,21 @@ document.addEventListener('DOMContentLoaded', () => {
             if (response.ok) {
                 showMessage(`Рецепт "${result.name}" успешно добавлен!`, 'success');
                 recipeForm.reset();
-                ingredientsList.innerHTML = `
-                    <div class="ingredient-input-wrap">
-                        <input type="text" class="ingredient-input" placeholder="Например, Курица" required>
-                        <button type="button" class="remove-ing-btn" onclick="this.parentElement.remove()">✕</button>
-                    </div>
-                `;
+                
+                // Очищаем список ингредиентов
+                ingredientsList.innerHTML = '';
+                
+                // Создаем новое поле с правильными обработчиками
+                const newWrapper = createIngredientInput('Например, Курица');
+                ingredientsList.appendChild(newWrapper);
+                
+                // Запускаем анимацию
+                setTimeout(() => {
+                    newWrapper.style.transition = 'all 0.3s ease';
+                    newWrapper.style.opacity = '1';
+                    newWrapper.style.transform = 'translateX(0)';
+                }, 10);
+                
             } else {
                 showMessage(`Ошибка: ${result.error}`, 'error');
             }
@@ -72,5 +101,10 @@ document.addEventListener('DOMContentLoaded', () => {
     function showMessage(text, type) {
         formMessage.innerText = text;
         formMessage.className = `message ${type}`;
+        
+        // Скрываем сообщение через 3 секунды
+        setTimeout(() => {
+            formMessage.className = 'message hidden';
+        }, 3000);
     }
 });

@@ -72,7 +72,23 @@ body {
 
 .column {
     padding: 30px;
-    min-height: 600px;
+}
+
+/* Обёртка для центрирования */
+.title-wrapper {
+    text-align: center;
+    margin: 30px 0;
+}
+
+h2.title-block {
+    display: inline-block;
+    font-size: 42px;
+    font-weight: 700;
+    color: #2d3748;
+    padding: 15px 40px;
+    border-radius: 20px;
+    background: transparent;
+    position: relative;
 }
 
 h2 {
@@ -253,7 +269,7 @@ input[type="text"] {
 
 /* Кнопка "Добавить" (Черная капсула, которую обрезают) */
 .btn-add {
-    background: #8ab5e0e6;          
+    background: #82ceec;          
     color: white;
     /* Справа делаем отступ чуть больше (35px), чтобы спрятанный под соеднюю кнопку край не сжимал текст */
     padding: 0 35px 0 25px;       
@@ -265,21 +281,23 @@ input[type="text"] {
 
 /* Кнопка "Найти рецепты" (Голубая капсула, которая ОБРЕЗАЕТ) */
 .btn-find-recipes {
-    background: #7cb9e8;          
+    background: #25ace6;          
     color: white;
     padding: 0 25px;              /* Стандартный аккуратный отступ */
     
     z-index: 3;                   /* Самый ВЫСОКИЙ слой — ложится поверх и обрезает черную */
     
-    /* Мягкая тень от закругленного левого края голубой кнопки на черную */
-    box-shadow: -6px 0 12px rgba(16, 24, 32, 0.25); 
+
 }
 
-/* Эффекты наведения */
-.btn-add:hover { background: #5b89ca; }
-.btn-find-recipes:hover { 
-    opacity: 0.95; 
-    box-shadow: -8px 0 16px rgba(16, 24, 32, 0.35); 
+.btn-add:hover {
+    opacity: 0.95;
+    box-shadow: 0 4px 12px rgba(16, 24, 32, 0.2);
+}
+
+.btn-find-recipes:hover {
+    opacity: 0.95;
+    box-shadow: -8px 0 16px rgba(16, 24, 32, 0.3);
 }
 
 .fridge-list { 
@@ -311,9 +329,8 @@ input[type="text"] {
 
 /* Этот стиль применится ко всем кнопкам с классом .btn-find-recipes */
 .btn-find-recipes {
-    background-color: #69a9c5;    /* Темный фон кнопки */
+    background-color: #25ace6;    /* Темный фон кнопки */
     color: #ffffff;               /* Белый текст */
-    border: 2px solid #8ab5e0e6;    /* Тонкая голубая обводка */
     
     padding: 10px 20px;           /* Внутренние отступы */
     font-size: 16px;              /* Размер текста */
@@ -463,125 +480,234 @@ input[type="text"] {
     100% { transform: scale(1); opacity: 0.8; }
 }
 
-/* Общий контейнер-родитель, который держит и картинку, и форму */
+/* Внешний контейнер */
 .recipe-form-hero {
     position: relative;
-    max-width: 550px; /* Этим параметром регулируй общую ширину домика */
-    margin: 40px auto;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 40px 20px;
 }
 
-/* Стили для самой картинки из HTML */
-.gingerbread-bg-img {
-    width: 100%;
-    height: auto;
-    display: block;
-}
-
-/* Контейнер формы, который накладывается ПОВЕРХ картинки */
-.recipe-form-container {
+/* Домик - отдельный блок на фоне */
+.gingerbread-house {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
+    background: url('/static/images/Image.png') center center no-repeat;
+    background-size: 125%;
+    z-index: 0;
+}
+
+.recipe-form-container {
+    position: relative;
+    z-index: 1;
+    max-width: 450px; 
+    width: 90%; 
+    margin: 130px auto 0 auto; /* Уменьшил margin-top, чтобы форма поднялась выше */
     
-    /* Делаем внутренние отступы, чтобы форма сжалась к центру домика */
-    padding: 30px; 
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    justify-content: center; /* Центрируем форму по вертикали */
-    font-family: Arial, sans-serif;
+    background: rgb(176 99 49);
+    
+    /* Добавляем высоту */
+    min-height: 570px;   
+    clip-path: polygon(
+        50% 0%,
+        100% 35%,
+        100% 100%,
+        0% 100%,
+        0% 35%
+    );   
+    padding: 70px 30px 30px 30px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    padding-top: 95px;
 }
 
-/* Заголовок формы */
-.recipe-form-container h2 {
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Заголовки */
+.recipe-header-block {
     text-align: center;
-    color: #4a2306; 
-    margin-top: 0;
     margin-bottom: 15px;
-    font-size: 20px;
-    font-weight: bold;
-    letter-spacing: 1px;
-    background: rgba(255, 255, 255, 0.85);
-    padding: 10px;
-    border-radius: 8px;
+    margin-top: 35px;
 }
 
-/* Текст подписей */
-.form-group label {
-    display: block;
-    margin-bottom: 6px;
-    font-weight: bold;
-    color: #4a2306;
+.recipe-header-block h2 {
+    color: #f8f8f8;
+    font-size: 21px;
+    font-weight: 700;
+    margin: 0 0 50px 0;
+    letter-spacing: -0.5px;
 }
 
-/* Инпуты */
-.form-group input[type="text"], 
-.form-group textarea {
-    width: 100%;
-    padding: 10px;
-    box-sizing: border-box;
-    border: 2px solid #dcd0c0;
-    border-radius: 8px;
-    background-color: #fffefb;
-    color: #4a2306;
+/* Группы полей */
+.form-group {
+    margin-bottom: 25px;
+}
+
+.form-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #ffffff;
     font-size: 14px;
 }
 
-/* Кнопка плюса */
-#addIngredientBtn {
-    background: #d64545;
-    color: white;
-    border: none;
-    padding: 8px 14px;
-    cursor: pointer;
-    border-radius: 20px;
-    margin-top: 6px;
-    font-weight: bold;
+.label-icon {
+    font-size: 16px;
 }
 
-/* Упаковка ингредиентов */
+/* Поля ввода */
+.form-input,
+.form-textarea {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px !important;
+    background: #e9eef0;
+    color: #2d3748;
+    font-size: 15px;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+}
+
+.form-input:focus,
+.form-textarea:focus {
+    outline: none;
+    border-color: #667eea;
+    background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    transform: translateY(-2px);
+}
+
+.form-input::placeholder,
+.form-textarea::placeholder {
+    color: #a0aec0;
+}
+
+.form-textarea {
+    resize: vertical;
+    min-height: 120px;
+    font-family: inherit;
+}
+
+/* Контейнер ингредиентов */
+.ingredients-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
 .ingredient-input-wrap {
     display: flex;
-    gap: 8px;
-    margin-bottom: 8px;
+    gap: 10px;
+    animation: fadeIn 0.3s ease;
 }
 
-/* Кнопка крестика */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.ingredient-input {
+    flex: 1;
+}
+
+/* Кнопка удаления ингредиента */
 .remove-ing-btn {
-    background: #5c2e0b;
-    color: #fcead2;
-    border: none;
-    padding: 0 12px;
-    cursor: pointer;
-    border-radius: 6px;
-}
-
-/* Зелёная кнопка Сохранить */
-#submitBtn {
-    background: #28a745;
+    background: #25ace6;
     color: white;
     border: none;
-    padding: 12px 20px;
-    font-size: 16px;
-    font-weight: bold;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
     cursor: pointer;
-    border-radius: 8px;
+    font-size: 20px;
+    line-height: 1;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.remove-ing-btn:hover {
+    background: #f56565;
+    transform: scale(1.1);
+}
+
+/* Кнопка добавления ингредиента с эффектами */
+.add-ingredient-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, #82ceec 0%, #25ace6 100%);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+    margin-top: 12px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(102, 126, 234, 0.3);
+}
+
+.add-ingredient-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(102, 126, 234, 0.4);
+}
+
+.add-ingredient-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
+}
+
+.add-ingredient-btn span {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+/* Кнопка "Сохранить рецепт" */
+#submitBtn {
+    background: linear-gradient(135deg, #82ceec 0%, #25ace6 100%);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
     width: 100%;
     margin-top: 10px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(89, 178, 219, 0.573);
 }
 
-#submitBtn:hover { background: #218838; }
-
-/* Сообщения об ошибках / успехе */
-.message {
-    margin-top: 10px;
-    padding: 8px;
-    border-radius: 6px;
-    text-align: center;
-    font-weight: bold;
+#submitBtn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(146, 212, 232, 0.4);
 }
-.success { background-color: #d4edda; color: #155724; }
-.error { background-color: #f8d7da; color: #721c24; }
-.hidden { display: none; }
+
+#submitBtn:active {
+    transform: translateY(0);
+}
