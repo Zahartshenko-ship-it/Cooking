@@ -480,6 +480,21 @@ input[type="text"] {
     100% { transform: scale(1); opacity: 0.8; }
 }
 
+.fridge-pulse-active {
+    animation: pulse 0.4s ease-in-out; /* Анимация проиграется один раз за 0.4 секунды */
+}
+
+.fly-particle {
+    position: fixed;
+    width: 14px;
+    height: 14px;
+    background-color: #3498db; /* Цвет кнопки Добавить */
+    border-radius: 50%;
+    z-index: 9999;
+    pointer-events: none; /* Чтобы точка не мешала кликам */
+    transition: transform 1s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.8s ease;
+}
+
 /* Внешний контейнер */
 .recipe-form-hero {
     position: relative;
@@ -497,7 +512,7 @@ input[type="text"] {
     left: 0;
     width: 100%;
     height: 100%;
-    background: url('/static/images/Image.png') center center no-repeat;
+    background: url('/static/images/Image-дом.png') center center no-repeat;
     background-size: 125%;
     z-index: 0;
 }
@@ -509,19 +524,9 @@ input[type="text"] {
     width: 90%; 
     margin: 130px auto 0 auto; /* Уменьшил margin-top, чтобы форма поднялась выше */
     
-    background: rgb(176 99 49);
-    
     /* Добавляем высоту */
-    min-height: 570px;   
-    clip-path: polygon(
-        50% 0%,
-        100% 35%,
-        100% 100%,
-        0% 100%,
-        0% 35%
-    );   
+    min-height: 570px;      
     padding: 70px 30px 30px 30px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
     padding-top: 95px;
 }
 
@@ -656,7 +661,7 @@ input[type="text"] {
 
 /* Кнопка добавления ингредиента с эффектами */
 .add-ingredient-btn {
-    display: inline-flex;
+    display: flex;
     align-items: center;
     gap: 8px;
     background: linear-gradient(135deg, #82ceec 0%, #25ace6 100%);

@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         wrapper.innerHTML = `
             <input type="text" class="ingredient-input form-input" placeholder="${placeholder}" required>
-            <button type="button" class="remove-ing-btn">✕</button>
+            <button type="button" class="remove-ing-btn">&times;</button>
         `;
         
         // Добавляем обработчик удаления
@@ -108,3 +108,4 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 3000);
     }
 });
+

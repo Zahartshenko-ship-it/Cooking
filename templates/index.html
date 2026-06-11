@@ -22,8 +22,8 @@
     
     <div class="search-group">
         <input type="text" id="ingredientInput" placeholder="Введите ингредиент (например: огурец)">            
-        <div class="suggestions" id="suggestionsBox"></div>
-        <button class="btn-add" onclick="manualAdd()">Добавить</button>
+        <div class="suggestions" id="suggestionsBox" onclick="animateFlyToFridge(event)"></div>
+        <button class="btn-add" id="addBtn" onclick="manualAdd(); animateFlyToFridge(event)">Добавить</button>
         <a href="#resultsArea" style="text-decoration: none;">
             <button class="btn-find-recipes" onclick="findRecipes()">Найти рецепты</button>
         </a>      
@@ -33,7 +33,7 @@
     </div>
 </div>
 <div class="floating-fridge" id="floatingFridge" onclick="toggleFridgeMenu()">
-    <img src="/static/images/холодильник.png" class="fridge-icon-img" alt="Холодильник">
+    <img src="/static/images/холодильник.png" class="fridge-icon-img" id="fridgeIcon" alt="Холодильник">
     <span class="fridge-counter" id="fridgeCounter">0</span>
 </div>
 
@@ -75,22 +75,9 @@
                 </label>
                 <input type="text" id="recipeName" class="form-input" required placeholder="Например, Пряники">
             </div>
-
-            <div class="form-group">
-                <label class="form-label">
-                    <span class="label-icon"></span>
-                    Ингредиенты
-                </label>
-                <div id="ingredientsList" class="ingredients-container">
-                    <div class="ingredient-input-wrap">
-                        <input type="text" class="ingredient-input form-input" placeholder="Мука, корица..." required>
-                        <button type="button" class="remove-ing-btn" onclick="removeIngredient(this)" title="Удалить">×</button>
-                    </div>
-                </div>
-                <button type="button" id="addIngredientBtn" class="add-ingredient-btn">
-                    <span>+</span> Добавить ингредиент
-                </button>
-            </div>
+            <menu>
+            <button id="updateDetails" class="add-ingredient-btn">Добавить ингридиенты</button>
+            </menu>
 
             <div class="form-group">
                 <label for="recipeDescription" class="form-label">
@@ -108,7 +95,46 @@
         <div id="formMessage" class="hidden"></div>
     </div>
 </div>
+<dialog id="favDialog" style="border: none;outline: none;border-radius: 20px;">
+    <div class="form-group">
+        <label class="form-label" style="color: black;">
+            <span class="label-icon"></span>
+            Ингредиенты
+        </label>
+        <div id="ingredientsList" class="ingredients-container">
+            <div class="ingredient-input-wrap">
+                <input type="text" class="ingredient-input form-input" placeholder="Мука, корица..." required>
+                <button type="button" class="remove-ing-btn" onclick="removeIngredient(this)" title="Удалить">&times;</button>
+            </div>
+        </div>
+        <div style="display: flex; gap: 5px; flex-direction: column;">
+            <button type="button" id="addIngredientBtn" class="add-ingredient-btn">
+                <span>+</span> Добавить ингредиент
+            </button>
+            <button type="button" id="cancel" class="add-ingredient-btn" style="justify-content: center;">
+                Сохранить
+            </button>
+        </div>
+    </div>
+</dialog>
 
+<script>
+  (function () {
+    var updateButton = document.getElementById("updateDetails");
+    var cancelButton = document.getElementById("cancel");
+    var favDialog = document.getElementById("favDialog");
+
+    // Update button opens a modal dialog
+    updateButton.addEventListener("click", function () {
+      favDialog.showModal();
+    });
+
+    // Form cancel button closes the dialog box
+    cancelButton.addEventListener("click", function () {
+      favDialog.close();
+    });
+  })();
+</script>
 <script src="/static/codes/recipe.js"></script>
 <script src="/static/codes/code.js"></script>
 

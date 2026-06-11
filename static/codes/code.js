@@ -232,3 +232,48 @@ function toggleFridgeMenu() {
     const drawer = document.getElementById('fridgeDrawer');
     drawer.classList.toggle('open');
 }
+
+function animateFlyToFridge(event) {
+    const fridge = document.getElementById('fridgeIcon');
+    if (!fridge) return;
+
+    // 1. Получаем координаты клика мыши на экране
+    const startX = event.clientX;
+    const startY = event.clientY;
+
+    // 2. Получаем координаты центра холодильника
+    const fridgeRect = fridge.getBoundingClientRect();
+    const targetX = fridgeRect.left + fridgeRect.width / 2 - 7;
+    const targetY = fridgeRect.top + fridgeRect.height / 2 - 7;
+
+    // 3. Создаем летающую точку
+    const particle = document.createElement('div');
+    particle.classList.add('fly-particle');
+    
+    // Задаем начальную позицию в точке клика
+    particle.style.left = `${startX}px`;
+    particle.style.top = `${startY}px`;
+
+    document.body.appendChild(particle);
+
+    // 4. Считаем расстояние для смещения
+    const diffX = targetX - startX;
+    const diffY = targetY - startY;
+
+    // 5. Запускаем полет
+    requestAnimationFrame(() => {
+        particle.style.transform = `translate(${diffX}px, ${diffY}px) scale(0.3)`;
+        particle.style.opacity = '0.5';
+    });
+
+    // 6. Приземление в холодильник
+    setTimeout(() => {
+        particle.remove();
+        
+        fridge.classList.add('fridge-pulse-active');
+        
+        setTimeout(() => {
+            fridge.classList.remove('fridge-pulse-active');
+        }, 400); 
+    }, 800);
+}
