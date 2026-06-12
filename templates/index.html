@@ -171,12 +171,11 @@
         }, 2000);
     };
 
-    // Update button opens a modal dialog
     updateButton.addEventListener("click", function () {
       favDialog.showModal();
     });
 
-    // Form cancel button closes the dialog box
+    // ОБНОВЛЕННЫЙ КОД: Проверка перед закрытием
     cancelButton.addEventListener("click", function () {
         const ingredientInputs = document.querySelectorAll('.ingredient-input');
 
