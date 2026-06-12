@@ -114,6 +114,7 @@
             <button type="button" id="cancel" class="add-ingredient-btn" style="justify-content: center;">
                 Сохранить
             </button>
+            <div id="dialogMessage" style="text-align: center; min-height: 20px; font-size: 14px; margin-top: 5px; transition: opacity 0.3s; opacity: 0; font-weight: 500;"></div>
         </div>
     </div>
 </dialog>
@@ -123,15 +124,48 @@
     var updateButton = document.getElementById("updateDetails");
     var cancelButton = document.getElementById("cancel");
     var favDialog = document.getElementById("favDialog");
+    var dialogMessage = document.getElementById("dialogMessage");
 
-    // Update button opens a modal dialog
+    window.showDialogMessage = function(text, color) {
+        if (!dialogMessage) return;
+        dialogMessage.textContent = text;
+        dialogMessage.style.color = color || '#333';
+        dialogMessage.style.opacity = '1';
+
+        clearTimeout(window.dialogMessageTimer);
+        window.dialogMessageTimer = setTimeout(() => {
+            dialogMessage.style.opacity = '0';
+        }, 2000);
+    };
+
     updateButton.addEventListener("click", function () {
       favDialog.showModal();
     });
 
-    // Form cancel button closes the dialog box
+    // ОБНОВЛЕННЫЙ КОД: Проверка перед закрытием
     cancelButton.addEventListener("click", function () {
-      favDialog.close();
+      const ingredientInputs = document.querySelectorAll('.ingredient-input');
+
+      // Ищем, есть ли хоть один инпут с пробелом или запятой
+      const invalidInput = Array.from(ingredientInputs).find(input => /[,\s]/.test(input.value));
+
+      if (invalidInput) {
+          invalidInput.classList.remove('input-error');
+          void invalidInput.offsetWidth;
+          invalidInput.classList.add('input-error');
+          invalidInput.focus();
+
+          // Выводим ошибку красным цветом внутри модального окна
+          window.showDialogMessage("Ошибка: используйте '_' вместо пробелов и удалите запятые!", "#dc3545");
+          return; // Блокируем закрытие окна
+      }
+
+      // Если всё хорошо — сохраняем и закрываем
+      window.showDialogMessage("Ингредиенты сохранены!", "#28a745");
+      setTimeout(() => {
+          favDialog.close();
+          dialogMessage.style.opacity = '0';
+      }, 1000);
     });
   })();
 </script>
