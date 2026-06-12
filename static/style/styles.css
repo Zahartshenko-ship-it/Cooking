@@ -107,7 +107,8 @@ h2 {
     margin: 40px auto 20px auto; 
     max-width: 650px;    /* Ширина, чтобы обе кнопки и инпут дышали свободно */
     width: 100%; 
-    gap: -10px;     
+    gap: -10px;
+    position: relative;
 }
 
 .floating-fridge {
@@ -207,23 +208,20 @@ h2 {
 /* --- Выпадающий список подсказок (Подборка) --- */
 .suggestions {
     position: absolute;
-    top: 600px;            /* Опускает список ровно под строку ввода */
-    left: 240px;              /* Выравнивает по левому краю инпута */
-    
-    /* Ширина списка. Так как инпут занимает flex: 1, 
-       сделаем подсказки примерно на ширину самого текстового поля */
-    width: 60%;
-    display: none;           
-    
+    top: 100%;
+    left: 0;
+    width: 100%;
+    display: none;
+
     background-color: #ffffff;
     border: 1px solid #e0e0e0;
-    border-radius: 15px;  /* Мягкое скругление углов */
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.921); /* Мягкая тень, чтобы приподнять над сайтом */
-    
-    max-height: 220px;    /* Ограничиваем высоту, если совпадений много */
-    overflow-y: auto;     /* Включает скролл внутри списка */
-    z-index: 999;         /* Выносит список поверх холодильника и карточек */
-    margin-top: 5px;      /* Небольшой аккуратный зазор от инпута */
+    border-radius: 15px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.921);
+
+    max-height: 220px;
+    overflow-y: auto;
+    z-index: 999;
+    margin-top: 5px;
 }
 
 /* Стили для самих элементов списка (заодно добавим внутренние отступы) */
@@ -240,13 +238,13 @@ h2 {
 
 
 input[type="text"] {
-    flex: 1;
-    padding: 12px 30px 12px 20px; 
+    width: 100%;
+    padding: 12px 30px 12px 20px;
     border: 1px solid #e0e0e000;
-    border-radius: 25px 0 0 25px; /* Сделали левый край инпута еще более круглым, под стать кнопкам */
+    border-radius: 25px 0 0 25px;
     font-size: 14px;
     outline: none;
-    height: 46px;                 /* Единая высота для всей строки */
+    height: 46px;
     box-sizing: border-box;
     border-right: none;
     position: relative;
@@ -754,4 +752,10 @@ input[type="text"] {
     100% {
         transform: translateX(-50%); 
     }
+}
+
+.search-wrapper {
+    position: relative;
+    flex: 1; /* Чтобы поле ввода тянулось на всю доступную ширину */
+    display: flex; /* Чтобы инпут лежал ровно */
 }

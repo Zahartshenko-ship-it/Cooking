@@ -34,12 +34,12 @@
     <h2 style="font-size: 34px;">Ваши ингредиенты</h2>
     
     <div class="search-group">
-        <input type="text" id="ingredientInput" placeholder="Введите ингредиент (например: огурец)">            
+        <input type="text" id="ingredientInput" placeholder="Введите ингредиент (например: огурец)">
         <div class="suggestions" id="suggestionsBox" onclick="animateFlyToFridge(event)"></div>
         <button class="btn-add" id="addBtn" onclick="manualAdd(); animateFlyToFridge(event)">Добавить</button>
         <a href="#resultsArea" style="text-decoration: none;">
             <button class="btn-find-recipes" onclick="findRecipes()">Найти рецепты</button>
-        </a>      
+        </a>
     </div>
 
         <div class="empty-state">Ваш холодильник пуст</div>
@@ -104,8 +104,6 @@
                 <span></span> Сохранить рецепт
             </button>
         </form>
-        
-        <div id="formMessage" class="hidden"></div>
     </div>
 </div>
 <dialog id="favDialog" style="border: none; outline: none; border-radius: 20px;">
@@ -139,12 +137,10 @@
     document.addEventListener('DOMContentLoaded', function() {
         const track = document.getElementById('carouselTrack');
         
-        // 1. Получаем все оригинальные элементы
+        // Получаем все оригинальные элементы
         const items = track.querySelectorAll('.food-carousel-item');
         
-        // 2. Дублируем их и добавляем в конец ленты
-        // Это создает 'запас', чтобы при сдвиге на 100%
-        // в кадре уже были те же самые картинки, и переход был незаметен.
+        // Дублируем их и добавляем в конец ленты
         items.forEach(item => {
             const clone = item.cloneNode(true);
             track.appendChild(clone);
@@ -175,11 +171,9 @@
       favDialog.showModal();
     });
 
-    // ОБНОВЛЕННЫЙ КОД: Проверка перед закрытием
     cancelButton.addEventListener("click", function () {
         const ingredientInputs = document.querySelectorAll('.ingredient-input');
 
-    // Ищем, есть ли хоть один инпут с пробелом или запятой
     const invalidInput = Array.from(ingredientInputs).find(input => /[,\s]/.test(input.value));
 
     if (invalidInput) {
