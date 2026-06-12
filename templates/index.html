@@ -108,25 +108,28 @@
         <div id="formMessage" class="hidden"></div>
     </div>
 </div>
-<dialog id="favDialog" style="border: none;outline: none;border-radius: 20px;">
+<dialog id="favDialog" style="border: none; outline: none; border-radius: 20px;">
     <div class="form-group">
         <label class="form-label" style="color: black;">
             <span class="label-icon"></span>
             Ингредиенты
         </label>
+        
         <div id="ingredientsList" class="ingredients-container">
             <div class="ingredient-input-wrap">
-                <input type="text" class="ingredient-input form-input" placeholder="Мука, корица..." required>
+                <input type="text" class="ingredient-input form-input" placeholder="Мука, корица...">
                 <button type="button" class="remove-ing-btn" onclick="removeIngredient(this)" title="Удалить">&times;</button>
             </div>
         </div>
+        
         <div style="display: flex; gap: 5px; flex-direction: column;">
-            <button type="button" id="addIngredientBtn" class="add-ingredient-btn">
+            <button type="button" id="addIngredientBtn" class="add-ingredient-btn" onclick="addIngredientField()">
                 <span>+</span> Добавить ингредиент
             </button>
-            <button type="button" id="cancel" class="add-ingredient-btn" style="justify-content: center;">
+            <button type="button" id="cancel" class="add-ingredient-btn" style="justify-content: center;" onclick="submitRecipe()">
                 Сохранить
             </button>
+            <div id="dialogMessage" style="text-align: center; min-height: 20px; font-size: 14px; margin-top: 5px; transition: opacity 0.3s; opacity: 0; font-weight: 500;"></div>
         </div>
     </div>
 </dialog>
@@ -154,6 +157,19 @@
     var updateButton = document.getElementById("updateDetails");
     var cancelButton = document.getElementById("cancel");
     var favDialog = document.getElementById("favDialog");
+    var dialogMessage = document.getElementById("dialogMessage");
+
+    window.showDialogMessage = function(text, color) {
+        if (!dialogMessage) return;
+        dialogMessage.textContent = text;
+        dialogMessage.style.color = color || '#333';
+        dialogMessage.style.opacity = '1';
+
+        clearTimeout(window.dialogMessageTimer);
+        window.dialogMessageTimer = setTimeout(() => {
+            dialogMessage.style.opacity = '0';
+        }, 2000);
+    };
 
     // Update button opens a modal dialog
     updateButton.addEventListener("click", function () {
@@ -162,7 +178,28 @@
 
     // Form cancel button closes the dialog box
     cancelButton.addEventListener("click", function () {
-      favDialog.close();
+        const ingredientInputs = document.querySelectorAll('.ingredient-input');
+
+    // Ищем, есть ли хоть один инпут с пробелом или запятой
+    const invalidInput = Array.from(ingredientInputs).find(input => /[,\s]/.test(input.value));
+
+    if (invalidInput) {
+        invalidInput.classList.remove('input-error');
+        void invalidInput.offsetWidth;
+        invalidInput.classList.add('input-error');
+        invalidInput.focus();
+
+        // Выводим ошибку красным цветом внутри модального окна
+        window.showDialogMessage("Ошибка: используйте '_' вместо пробелов и удалите запятые!", "#dc3545");
+        return; // Блокируем закрытие окна
+    }
+
+    // Если всё хорошо — сохраняем и закрываем
+    window.showDialogMessage("Ингредиенты сохранены!", "#28a745");
+    setTimeout(() => {
+        favDialog.close();
+        dialogMessage.style.opacity = '0';
+    }, 1000);
     });
   })();
 </script>
