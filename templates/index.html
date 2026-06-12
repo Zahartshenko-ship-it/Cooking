@@ -15,7 +15,20 @@
         CookHelper
     </div>
 </div>
-<img src="/static/images/Бургер-шапка.png" alt="Вкусный бургер" class="burger-img">
+<!-- <img src="/static/images/Бургер-шапка.png" alt="Вкусный бургер" class="burger-img"> -->
+
+<div class="food-carousel-container">
+    <div class="food-carousel-track" id="carouselTrack">
+        <div class="food-carousel-item"><img src="/static/images/Бургеры.png" alt="Блюдо 1"></div>
+        <div class="food-carousel-item"><img src="/static/images/Пельмени.png" alt="Блюдо 2"></div>
+        <div class="food-carousel-item"><img src="/static/images/Пирог.png" alt="Блюдо 3"></div>
+        <div class="food-carousel-item"><img src="/static/images/Лобстеры.png" alt="Блюдо 4"></div>
+        <div class="food-carousel-item"><img src="/static/images/Курица.png" alt="Блюдо 5"></div>
+        <div class="food-carousel-item"><img src="/static/images/Яичница.png" alt="Блюдо 6"></div>
+        <div class="food-carousel-item"><img src="/static/images/Блины.png" alt="Блюдо 7"></div>
+        <div class="food-carousel-item"><img src="/static/images/Овощи.png" alt="Блюдо 8"></div>
+    </div>
+</div>
 
 <div class="column">
     <h2 style="font-size: 34px;">Ваши ингредиенты</h2>
@@ -117,6 +130,24 @@
         </div>
     </div>
 </dialog>
+
+<script>
+    // Этот скрипт нужен только для создания бесконечного эффекта
+    document.addEventListener('DOMContentLoaded', function() {
+        const track = document.getElementById('carouselTrack');
+        
+        // 1. Получаем все оригинальные элементы
+        const items = track.querySelectorAll('.food-carousel-item');
+        
+        // 2. Дублируем их и добавляем в конец ленты
+        // Это создает 'запас', чтобы при сдвиге на 100%
+        // в кадре уже были те же самые картинки, и переход был незаметен.
+        items.forEach(item => {
+            const clone = item.cloneNode(true);
+            track.appendChild(clone);
+        });
+    });
+</script>
 
 <script>
   (function () {

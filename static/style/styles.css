@@ -716,3 +716,42 @@ input[type="text"] {
 #submitBtn:active {
     transform: translateY(0);
 }
+
+.food-carousel-container {
+    width: 100%;             
+    overflow: hidden;           
+    padding: 20px 0;
+    position: relative;
+}
+
+/* Перевели на flex, чтобы трек не схлопывался и точно знал свою ширину */
+.food-carousel-track {
+    display: flex; 
+    width: max-content; /* Важно: трек растягивается ровно под контент */
+    animation: scroll-horizontal 20s linear infinite; 
+}
+
+.food-carousel-item {
+    flex-shrink: 0; /* Запрещаем картинкам сжиматься */
+    width: 250px;             
+    height: 200px;
+    margin: 0 15px;           
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.food-carousel-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;        
+}
+
+/* Теперь -50% сдвигает ленту ровно на первую (оригинальную) пятерку картинок */
+@keyframes scroll-horizontal {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(-50%); 
+    }
+}
