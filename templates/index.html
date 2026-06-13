@@ -88,7 +88,7 @@
                 <input type="text" id="recipeName" class="form-input" required placeholder="Например, Пряники">
             </div>
             <menu>
-            <button id="updateDetails" class="add-ingredient-btn">Добавить ингридиенты</button>
+            <button id="updateDetails" class="add-ingredient-btn">Добавить ингредиенты</button>
             </menu>
 
             <div class="form-group">
@@ -125,6 +125,9 @@
             </button>
             <button type="button" id="cancel" class="add-ingredient-btn" style="justify-content: center;" onclick="submitRecipe()">
                 Сохранить
+            </button>
+            <button type="button" class="add-ingredient-btn" style="justify-content: center; background: transparent; color: #888; border: 1.5px solid #ccc;" onclick="document.getElementById('favDialog').close()">
+                Закрыть
             </button>
             <div id="dialogMessage" style="text-align: center; min-height: 20px; font-size: 14px; margin-top: 5px; transition: opacity 0.3s; opacity: 0; font-weight: 500;"></div>
         </div>
