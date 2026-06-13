@@ -95,9 +95,9 @@ function findRecipes() {
     
     // 1. ПРОВЕРКА: Если в холодильнике пусто — возвращаем заглушку и скроллим к ней
     if (myFridge.length === 0) {
+        alert('Холодильник пуст! Добавьте хотя бы один продукт, чтобы найти рецепты.');
         resultsArea.innerHTML = '<div class="empty-state">Добавьте продукты, чтобы увидеть рецепты</div>';
-        resultsArea.scrollIntoView({ behavior: 'smooth' });
-        return; // Мягко выходим, сервер мучить не нужно
+        return; // Выход
     }
     
     // 2. Если продукты есть, пишем, что ищем рецепты
