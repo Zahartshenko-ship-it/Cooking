@@ -108,7 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const result = await response.json();
 
             if (response.ok) {
-                showMessage(`Рецепт "${result.name}" успешно добавлен!`, 'success');
+                alert(`Рецепт "${result.name}" успешно добавлен!`);
                 recipeForm.reset();
                 ingredientsList.innerHTML = '';
 
