@@ -241,7 +241,7 @@ input[type="text"] {
     width: 100%;
     padding: 12px 30px 12px 20px;
     border: 1px solid #e0e0e000;
-    border-radius: 25px 0 0 25px;
+    border-radius: 25px 25px 25px 25px;
     font-size: 14px;
     outline: none;
     height: 46px;
@@ -758,4 +758,147 @@ input[type="text"] {
     position: relative;
     flex: 1; /* Чтобы поле ввода тянулось на всю доступную ширину */
     display: flex; /* Чтобы инпут лежал ровно */
+}
+
+/* ==========================================================================
+   МОБИЛЬНАЯ АДАПТАЦИЯ (Для экранов меньше 768px)
+   ========================================================================== */
+@media screen and (max-width: 768px) {
+    
+    /* 1. Общие уменьшения и сброс отступов */
+    body {
+        font-size: 14px;
+    }
+
+    .main-grid {
+        grid-template-columns: 1fr; /* Переключаем сетку в одну колонку */
+        gap: 15px;
+        margin: 10px auto;
+        padding: 0 10px;
+    }
+
+    .column {
+        padding: 15px 10px; /* Уменьшаем внутренние отступы колонок */
+    }
+
+    /* 2. Уменьшение гигантских заголовков */
+    .title-wrapper {
+        margin: 15px 0;
+    }
+
+    h2.title-block {
+        font-size: 24px; /* Было 42px */
+        padding: 10px 20px;
+    }
+
+    h2 {
+        font-size: 15px; /* Было 18px */
+        margin-bottom: 15px;
+    }
+
+    /* 3. Пересчет строки поиска и кнопок (чтобы не ломались капсулы) */
+    .search-group {
+        margin: 20px auto;
+        gap: 5px; /* Вместо отрицательных отступов делаем небольшой зазор */
+    }
+
+    input[type="text"] {
+        padding: 10px 15px;
+        font-size: 13px;
+        height: 40px; /* Уменьшаем высоту строки с 46px до 40px */
+        border-radius: 20px; /* Индивидуальное скругление */
+        border: 1px solid #e0e0e0;
+    }
+
+    .btn-add, .btn-find-recipes, .btn-find-recipes {
+        height: 40px; /* Соответствует инпуту */
+        font-size: 12px;
+        padding: 0 15px !important;
+        border-radius: 20px !important;
+        margin: 0 !important; /* Сбрасываем наплывы (негативные маржины) */
+    }
+
+    /* 4. Исправление выпадающего списка подсказок (Важно!) */
+    .suggestions {
+        position: absolute;
+        top: auto;   /* Сбрасываем жесткие 600px */
+        left: 0;     /* Выравниваем по левому краю родительского search-group */
+        width: 100%; /* Занимает всю ширину инпута */
+        max-height: 180px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    /* 5. Плавающий холодильник и шторка */
+    .floating-fridge {
+        bottom: 20px;
+        right: 20px;
+        width: 50px;
+        height: 50px;
+    }
+
+    .fridge-icon-img {
+        width: 45px;
+        height: 45px;
+    }
+
+    .fridge-drawer {
+        width: 100%; /* Шторка на телефоне открывается на весь экран */
+        right: -100%;
+    }
+
+    .fridge-list {
+        max-width: 100%; /* Список продуктов занимает всю ширину */
+    }
+
+    /* 6. Карточки рецептов */
+    .recipe-card {
+        padding: 10px;
+        border-radius: 15px;
+    }
+
+    .recipe-main-content {
+        gap: 10px;
+    }
+
+    .recipe-img {
+        width: 60px; /* Чуть уменьшаем картинку блюда */
+        height: 60px;
+        border-radius: 10px;
+    }
+
+    .recipe-info h3 {
+        font-size: 14px;
+    }
+
+    .recipe-meta {
+        flex-direction: column; /* Тэги времени и совпадения встают друг под друга */
+        align-items: flex-start;
+        gap: 5px;
+        margin-top: 8px;
+    }
+
+    /* 7. Форма добавления рецептов (Контейнер в домике) */
+    .recipe-form-container {
+        margin: 40px auto 0 auto; /* Опускаем от шапки, но не так сильно, как на ПК */
+        padding: 30px 20px 20px 20px;
+        min-height: auto;
+        background: rgb(232 158 99); /* Добавляем темную подложку, чтобы текст читался на фоне дома */
+        border-radius: 20px;
+    }
+
+    .recipe-header-block h2 {
+        font-size: 18px;
+        margin-bottom: 25px;
+    }
+
+    /* 8. Карусель еды */
+    .food-carousel-item {
+        width: 160px; /* Уменьшаем карточки в слайдере */
+        height: 120px;
+        margin: 0 8px;
+    }
+
+    .gingerbread-house {
+        display: none; /* Убирает блок с фоновым домиком */
+    }
 }
